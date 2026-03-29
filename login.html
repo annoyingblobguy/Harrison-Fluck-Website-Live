@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        html, body { height: 100%; }
+
+        .login-wrap {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-glow {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 60% at 50% 30%, rgba(41,151,255,0.11) 0%, transparent 70%);
+        }
+
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px 40px 40px;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 180px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--blue), transparent);
+        }
+
+        .login-brand {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .login-initials {
+            display: inline-flex;
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, #0a5fd8, #2997ff);
+            border-radius: 16px;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .login-brand h1 {
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--white);
+            margin-bottom: 4px;
+        }
+
+        .login-brand p {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .form-field { margin-bottom: 14px; }
+
+        .form-field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gray);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+        }
+
+        .field-wrap { position: relative; }
+
+        .field-wrap input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px 42px 12px 14px;
+            font-size: 15px;
+            color: var(--white);
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .field-wrap input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(41,151,255,0.14);
+        }
+
+        .field-wrap input::placeholder { color: var(--gray-dim); }
+
+        .field-icon {
+            position: absolute;
+            right: 13px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-dim);
+            font-size: 13px;
+            cursor: pointer;
+            transition: color 0.2s;
+            user-select: none;
+        }
+
+        .field-icon:hover { color: var(--gray); }
+
+        .error-msg {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,69,58,0.1);
+            border: 1px solid rgba(255,69,58,0.28);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #ff453a;
+            margin-bottom: 14px;
+        }
+
+        .error-msg.show { display: flex; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--blue);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 4px;
+            letter-spacing: -0.01em;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #3aa3ff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(41,151,255,0.38);
+        }
+
+        .submit-btn:active { transform: translateY(0); box-shadow: none; }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--gray);
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: var(--white); }
+
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            20%      { transform: translateX(-7px); }
+            40%      { transform: translateX(7px); }
+            60%      { transform: translateX(-4px); }
+            80%      { transform: translateX(4px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrap">
+        <div class="login-glow"></div>
+
+        <div class="login-card" id="card">
+            <div class="login-brand">
+                <div class="login-initials">HF</div>
+                <h1>Welcome back</h1>
+                <p>Sign in to access your dashboard</p>
+            </div>
+
+            <form id="login-form" novalidate>
+                <div class="form-field">
+                    <label for="username">Username</label>
+                    <div class="field-wrap">
+                        <input type="text" id="username" placeholder="Username"
+                               autocomplete="username" spellcheck="false">
+                        <i class="fas fa-user field-icon"></i>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="password">Password</label>
+                    <div class="field-wrap">
+                        <input type="password" id="password" placeholder="Password"
+                               autocomplete="current-password">
+                        <i class="fas fa-eye field-icon" id="eye-toggle"></i>
+                    </div>
+                </div>
+
+                <div class="error-msg" id="error-msg">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Incorrect username or password.
+                </div>
+
+                <button type="submit" class="submit-btn">Sign In</button>
+            </form>
+
+            <a href="/" class="back-link">&larr; Back to site</a>
+        </div>
+    </div>
+
+    <script>
+    // NOTE: Credentials are stored in client-side JS — not a secure auth system.
+    // This is purely to keep the dashboard from being immediately visible to
+    // casual visitors. Anyone viewing page source can read these values.
+    (function() {
+        var U = 'harrisonfluck', P = 'Adventureawaits4!';
+
+        if (sessionStorage.getItem('hf_auth') === '1') {
+            location.replace('dashboard.html');
+        }
+
+        // Password toggle
+        var passEl  = document.getElementById('password');
+        var eyeEl   = document.getElementById('eye-toggle');
+        eyeEl.addEventListener('click', function() {
+            var show = passEl.type === 'password';
+            passEl.type = show ? 'text' : 'password';
+            eyeEl.className = 'field-icon ' + (show ? 'fas fa-eye-slash' : 'fas fa-eye');
+        });
+
+        // Submit
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var u   = document.getElementById('username').value.trim();
+            var p   = document.getElementById('password').value;
+            var err = document.getElementById('error-msg');
+
+            if (u === U && p === P) {
+                sessionStorage.setItem('hf_auth', '1');
+                location.replace('dashboard.html');
+            } else {
+                err.classList.add('show');
+                var card = document.getElementById('card');
+                card.style.animation = 'shake 0.4s ease';
+                setTimeout(function() { card.style.animation = ''; }, 420);
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

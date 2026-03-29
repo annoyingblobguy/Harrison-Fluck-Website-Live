@@ -3,115 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harrison Fluck - Personal Website</title>
+    <title>Harrison Fluck</title>
+    <meta name="description" content="Harrison Fluck — student, coder, and adventurer from Brisbane.">
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="index.html">Harrison Fluck</a>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="/" class="nav-logo">Harrison <span>Fluck</span></a>
+            <div class="nav-links">
+                <a href="/" class="nav-link active">Home</a>
+                <a href="/blog/" class="nav-link">Blog</a>
             </div>
-            <div class="nav-menu" id="nav-menu">
-                <a href="index.html" class="nav-link active">Home</a>
-                <a href="about.html" class="nav-link">About</a>
-                <a href="activities.html" class="nav-link">Activities</a>
-                <a href="tours.html" class="nav-link">Tours</a>
-                <a href="blog.html" class="nav-link">Blog</a>
-                <a href="wallpapers.html" class="nav-link">Wallpapers</a>
-                <a href="contact.html" class="nav-link">Contact</a>
-            </div>
-            <div class="hamburger" id="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
+            <button class="hamburger" id="hamburger" aria-label="Open menu">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </nav>
 
+    <!-- MOBILE NAV -->
+    <div class="mobile-nav" id="mobile-nav">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/blog/" class="nav-link">Blog</a>
+    </div>
+
     <main>
-        <!-- Hero Section -->
-        <section id="home" class="hero">
-            <div class="hero-container">
+
+        <!-- ═══ HERO ═══ -->
+        <section class="hero">
+            <div class="hero-bg">
+                <div class="hero-glow-1"></div>
+                <div class="hero-glow-2"></div>
+            </div>
+            <div class="container">
                 <div class="hero-content">
+                    <span class="eyebrow">Anglican Church Grammar School &middot; Brisbane</span>
                     <h1 class="hero-title">
-                        Hi, I'm Harrison Fluck
+                        Student.<br>
+                        <span class="gradient-text">Builder.</span><br>
+                        Adventurer.
                     </h1>
-                    <p class="hero-subtitle">
-                        15-year-old student at Anglican Church Grammar School
+                    <p class="hero-desc">
+                        I'm Harrison &mdash; a 15-year-old who codes, explores the outdoors, and believes the best people are good at everything.
                     </p>
-                    <p class="hero-description">
-                        Passionate about technology, outdoor adventures, and creative pursuits through stage crew work.
-                    </p>
-                    <div class="hero-buttons">
-                        <a href="about.html" class="btn btn-primary">Learn More About Me</a>
-                        <a href="https://github.com/harrison991" target="_blank" class="btn btn-secondary">
-                            <i class="fab fa-github"></i> View My GitHub
-                        </a>
-                    </div>
-                </div>
-                <div class="hero-image">
-                    <div class="profile-card">
-                        <div class="profile-icon">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <h3>Harrison Fluck</h3>
-                        <p>Student & Adventurer</p>
+                    <div class="hero-cta">
+                        <a href="#about" class="btn-primary">About Me</a>
+                        <a href="/blog/" class="btn-ghost">Read My Blog <i class="fas fa-arrow-right" style="font-size:11px"></i></a>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Quick Navigation Section -->
-        <section class="quick-nav">
+        <hr class="section-divider">
+
+        <!-- ═══ ABOUT ═══ -->
+        <section id="about" class="section">
             <div class="container">
-                <h2 class="section-title">Explore My Journey</h2>
-                <div class="nav-cards">
-                    <a href="about.html" class="nav-card">
-                        <div class="nav-icon">
-                            <i class="fas fa-user"></i>
+                <div class="about-grid">
+                    <div class="about-text fade-up">
+                        <span class="section-label">About Me</span>
+                        <h2>All-rounder by choice,<br>builder by passion.</h2>
+                        <p>I'm a Year 10 student at Anglican Church Grammar School (Churchie) in Brisbane. My philosophy is simple: don't be the person who can only do one thing. Be the person who can ship a web app, lead a 5-day expedition, rig stage lighting, and still show up for their teammates on the rowing crew.</p>
+                        <p>Whether I'm deep in code late at night, setting up lights for a school musical, or bushwalking through the mountains on a camp — I'm always chasing the next challenge.</p>
+                    </div>
+                    <div class="stats-grid fade-up">
+                        <div class="stat-card">
+                            <span class="stat-number">15</span>
+                            <span class="stat-label">Years Old</span>
                         </div>
-                        <h3>About Me</h3>
-                        <p>Learn about my background, interests, and personal details</p>
-                    </a>
-                    <a href="activities.html" class="nav-card">
-                        <div class="nav-icon">
-                            <i class="fas fa-basketball-ball"></i>
+                        <div class="stat-card">
+                            <span class="stat-number">Yr 10</span>
+                            <span class="stat-label">Churchie</span>
                         </div>
-                        <h3>My Activities</h3>
-                        <p>Discover my passion for stage crew, basketball, and rowing</p>
-                    </a>
-                    <a href="tours.html" class="nav-card">
-                        <div class="nav-icon">
-                            <i class="fas fa-mountain"></i>
+                        <div class="stat-card">
+                            <span class="stat-number">BNE</span>
+                            <span class="stat-label">Based</span>
                         </div>
-                        <h3>Adventure Tours</h3>
-                        <p>Follow my journey through outdoor education and adventures</p>
-                    </a>
-                    <a href="blog.html" class="nav-card">
-                        <div class="nav-icon">
-                            <i class="fas fa-pen"></i>
+                        <div class="stat-card">
+                            <span class="stat-number">&infin;</span>
+                            <span class="stat-label">Curiosity</span>
                         </div>
-                        <h3>My Blog</h3>
-                        <p>Read my thoughts and stories about adventures and experiences</p>
-                    </a>
-                    <a href="contact.html" class="nav-card">
-                        <div class="nav-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <h3>Get In Touch</h3>
-                        <p>Connect with me and let's start a conversation</p>
-                    </a>
+                    </div>
                 </div>
             </div>
         </section>
+
+        <hr class="section-divider">
+
+        <!-- ═══ WHAT I DO ═══ -->
+        <section id="what-i-do" class="section interests-section">
+            <div class="container">
+                <span class="section-label">What I Do</span>
+                <h2>Built for everything.</h2>
+                <div class="interests-grid">
+
+                    <!-- Featured card -->
+                    <div class="interest-card featured fade-up">
+                        <div class="interest-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div>
+                            <h3>Coding &amp; Building</h3>
+                            <p>From websites to apps, I love taking an idea and making it real. I'm drawn to the full picture &mdash; design, frontend, and making things that actually work and look great. This site is one of my own builds: everything you see was coded by me, including the blog system.</p>
+                            <div class="interest-tags">
+                                <span>Web Dev</span>
+                                <span>JavaScript</span>
+                                <span>Jekyll</span>
+                                <span>GitHub</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="interest-card fade-up">
+                        <div class="interest-icon"><i class="fas fa-mountain"></i></div>
+                        <h3>Adventure &amp; Camps</h3>
+                        <p>Outdoor education, multi-day expedition camps, and bushwalking. Vision Valley, overnight hikes, and pushing limits in the wild are where I feel most alive.</p>
+                    </div>
+
+                    <div class="interest-card fade-up">
+                        <div class="interest-icon"><i class="fas fa-lightbulb"></i></div>
+                        <h3>Stage Crew</h3>
+                        <p>Behind every great school production. I handle lighting rigs, sound, and the technical side of live performance &mdash; making sure the show goes on perfectly every time.</p>
+                    </div>
+
+                    <div class="interest-card fade-up">
+                        <div class="interest-icon"><i class="fas fa-trophy"></i></div>
+                        <h3>Sports</h3>
+                        <p>Rowing and basketball. The team element is everything &mdash; grit, discipline, early mornings on the water, and working together toward something bigger than yourself.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ═══ ADVENTURES ═══ -->
+        <section id="adventures" class="section">
+            <div class="container">
+                <span class="section-label">Adventures</span>
+                <h2>Out there doing it.</h2>
+                <div class="timeline">
+
+                    <div class="timeline-item fade-up">
+                        <div class="timeline-dot"></div>
+                        <div>
+                            <span class="timeline-date">2024</span>
+                            <h3>Vision Valley</h3>
+                            <p>Multi-day adventure camp deep in the mountains. Bushwalking, river crossings, and the kind of shared experiences that build real character.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item fade-up">
+                        <div class="timeline-dot"></div>
+                        <div>
+                            <span class="timeline-date">2024</span>
+                            <h3>Rowing Season</h3>
+                            <p>Another season on the water, building endurance and discipline through early mornings and hard training with the crew.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item fade-up">
+                        <div class="timeline-dot"></div>
+                        <div>
+                            <span class="timeline-date">Ongoing</span>
+                            <h3>Stage Crew &amp; Productions</h3>
+                            <p>Working behind the scenes on major school productions &mdash; managing technical setups, lighting, and ensuring every show runs flawlessly.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item fade-up">
+                        <div class="timeline-dot"></div>
+                        <div>
+                            <span class="timeline-date">Ongoing</span>
+                            <h3>This Website</h3>
+                            <p>My first real web project, built from scratch. Designed, coded, and deployed by me &mdash; including a full Jekyll-powered blog system. Always iterating.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ═══ CONTACT ═══ -->
+        <section id="contact" class="section contact-section">
+            <div class="container">
+                <div class="contact-card-wrap">
+                    <div class="contact-card fade-up">
+                        <span class="eyebrow">Get In Touch</span>
+                        <h2>Let's connect.</h2>
+                        <p>Whether you want to talk code, share adventure stories, or just say hi &mdash; I'm always up for a good conversation.</p>
+                        <div class="contact-btns">
+                            <a href="mailto:hf@harrisonfluck.me" class="btn-primary">
+                                <i class="fas fa-envelope"></i> Email Me
+                            </a>
+                            <a href="https://github.com/harrison991" target="_blank" rel="noopener" class="btn-ghost">
+                                <i class="fab fa-github"></i> GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2025 Harrison Fluck. Built with passion and hosted on GitHub Pages.</p>
+    <footer>
+        <div class="footer-inner">
+            <p>&copy; 2025 Harrison Fluck &middot; Built with code and curiosity</p>
+            <a href="/blog/">Blog &rarr;</a>
         </div>
     </footer>
 

@@ -3,105 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if page.title %}{{ page.title }} - {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+    <title>{% if page.title %}{{ page.title }} — Harrison Fluck{% else %}Harrison Fluck{% endif %}</title>
     <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- Styles -->
     <link rel="stylesheet" href="{{ '/styles.css' | relative_url }}">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     {% seo %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="{{ '/' | relative_url }}">Harrison Fluck</a>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="{{ '/' | relative_url }}" class="nav-logo">Harrison <span>Fluck</span></a>
+            <div class="nav-links">
+                <a href="{{ '/' | relative_url }}" class="nav-link">Home</a>
+                <a href="{{ '/blog/' | relative_url }}" class="nav-link{% if page.url contains 'blog' %} active{% endif %}">Blog</a>
             </div>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="{{ '/' | relative_url }}" class="nav-link">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ '/about.html' | relative_url }}" class="nav-link">About</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ '/activities.html' | relative_url }}" class="nav-link">Activities</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ '/tours.html' | relative_url }}" class="nav-link">Tours</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ '/blog.html' | relative_url }}" class="nav-link">Blog</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ '/wallpapers.html' | relative_url }}" class="nav-link">Wallpapers</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ '/contact.html' | relative_url }}" class="nav-link">Contact</a>
-                </li>
-            </ul>
-            <div class="nav-toggle" id="mobile-menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
+            <button class="hamburger" id="hamburger" aria-label="Open menu">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </nav>
+
+    <!-- MOBILE NAV -->
+    <div class="mobile-nav" id="mobile-nav">
+        <a href="{{ '/' | relative_url }}" class="nav-link">Home</a>
+        <a href="{{ '/blog/' | relative_url }}" class="nav-link">Blog</a>
+    </div>
 
     <main>
         {{ content }}
     </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Harrison Fluck</h3>
-                    <p>15-year-old student passionate about adventures, technology, and creativity.</p>
-                    <div class="social-links">
-                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
-                        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
-                        <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
-                    </div>
-                </div>
-                <div class="footer-section">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="{{ '/' | relative_url }}">Home</a></li>
-                        <li><a href="{{ '/about.html' | relative_url }}">About</a></li>
-                        <li><a href="{{ '/activities.html' | relative_url }}">Activities</a></li>
-                        <li><a href="{{ '/tours.html' | relative_url }}">Tours</a></li>
-                        <li><a href="{{ '/blog.html' | relative_url }}">Blog</a></li>
-                        <li><a href="{{ '/wallpapers.html' | relative_url }}">Wallpapers</a></li>
-                        <li><a href="{{ '/contact.html' | relative_url }}">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>Latest Posts</h3>
-                    <ul>
-                        {% for post in site.posts limit:3 %}
-                        <li><a href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; {{ 'now' | date: '%Y' }} Harrison Fluck. All rights reserved.</p>
-            </div>
+    <footer>
+        <div class="footer-inner">
+            <p>&copy; {{ 'now' | date: '%Y' }} Harrison Fluck &middot; Built with code and curiosity</p>
+            <a href="{{ '/blog/' | relative_url }}">Blog &rarr;</a>
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script src="{{ '/script.js' | relative_url }}"></script>
-    {% if page.layout == 'post' or page.url contains '/blog' %}
-    <script src="{{ '/blog.js' | relative_url }}"></script>
-    {% endif %}
 </body>
 </html>

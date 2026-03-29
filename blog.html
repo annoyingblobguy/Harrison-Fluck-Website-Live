@@ -4,98 +4,98 @@ title: Blog
 permalink: /blog/
 ---
 
-<!-- Hero Section -->
-<section class="hero">
-    <div class="hero-container">
-        <h1 class="hero-title">My Blog</h1>
-        <p class="hero-description">Adventures, experiences, and insights from my journey</p>
-    </div>
-</section>
-
-<!-- Blog Posts Section -->
-<section class="blog-posts-section">
+<!-- Blog hero -->
+<div class="blog-hero">
     <div class="container">
-        <div class="section-header">
-            <h2>Latest Posts</h2>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">All Posts</button>
-                <button class="filter-btn" data-filter="adventure">Adventure</button>
-                <button class="filter-btn" data-filter="sports">Sports</button>
-                <button class="filter-btn" data-filter="personal">Personal</button>
-                <button class="filter-btn" data-filter="technology">Technology</button>
+        <span class="eyebrow">My Writing</span>
+        <h1>The <span class="gradient-text">Blog.</span></h1>
+        <p>Adventures, experiences, and thoughts from the journey.</p>
+    </div>
+</div>
+
+<!-- Posts -->
+<div class="container">
+
+    <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="adventure">Adventure</button>
+        <button class="filter-btn" data-filter="sports">Sports</button>
+        <button class="filter-btn" data-filter="activities">Activities</button>
+        <button class="filter-btn" data-filter="tech">Tech</button>
+        <button class="filter-btn" data-filter="personal">Personal</button>
+    </div>
+
+    {% if site.posts.size > 0 %}
+    <div class="posts-grid" id="posts-grid">
+        {% for post in site.posts %}
+        <article class="post-card" data-category="{{ post.category | default: 'personal' }}">
+            <div class="post-card-img">
+                {% if post.featured_image %}
+                    <img src="{{ post.featured_image | relative_url }}" alt="{{ post.title }}" loading="lazy">
+                {% else %}
+                    <div class="post-cat-bg cat-bg-{{ post.category | default: 'personal' }}">
+                        {% case post.category %}
+                            {% when 'adventure' %}
+                                <i class="fas fa-mountain" style="color:rgba(255,255,255,0.5)"></i>
+                            {% when 'sports' %}
+                                <i class="fas fa-trophy" style="color:rgba(255,255,255,0.5)"></i>
+                            {% when 'activities' %}
+                                <i class="fas fa-lightbulb" style="color:rgba(255,255,255,0.5)"></i>
+                            {% when 'tech' %}
+                                <i class="fas fa-code" style="color:rgba(255,255,255,0.5)"></i>
+                            {% when 'school' %}
+                                <i class="fas fa-book" style="color:rgba(255,255,255,0.5)"></i>
+                            {% else %}
+                                <i class="fas fa-pen" style="color:rgba(255,255,255,0.5)"></i>
+                        {% endcase %}
+                    </div>
+                {% endif %}
             </div>
-        </div>
-        
-        <div class="blog-posts-grid" id="blog-posts-grid">
-            {% for post in site.posts %}
-            <article class="blog-post" data-category="{{ post.category }}">
-                <div class="post-image">
-                    {% if post.featured_image %}
-                        <img src="{{ post.featured_image | relative_url }}" alt="{{ post.title }}" onerror="this.src='https://via.placeholder.com/400x250/4a90e2/ffffff?text={{ post.title | url_encode }}'">
+            <div class="post-card-body">
+                <div class="post-card-meta">
+                    <span class="post-cat">{{ post.category | capitalize | default: "Post" }}</span>
+                    <span class="post-date-label">{{ post.date | date: "%b %d, %Y" }}</span>
+                </div>
+                <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
+                <p>
+                    {% if post.excerpt %}
+                        {{ post.excerpt | strip_html | truncate: 130 }}
                     {% else %}
-                        <img src="https://via.placeholder.com/400x250/4a90e2/ffffff?text={{ post.title | url_encode }}" alt="{{ post.title }}">
+                        {{ post.content | strip_html | truncate: 130 }}
                     {% endif %}
-                </div>
-                <div class="post-content">
-                    <div class="post-meta">
-                        <span class="post-category {{ post.category }}">{{ post.category | capitalize }}</span>
-                        <span class="post-date">{{ post.date | date: "%B %d, %Y" }}</span>
-                        <span class="read-time">
-                            <i class="fas fa-clock"></i>
-                            {% assign words = post.content | number_of_words %}
-                            {% assign read_time = words | divided_by: 200 | at_least: 1 %}
-                            {{ read_time }} min read
-                        </span>
-                    </div>
-                    <h3 class="post-title">
-                        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-                    </h3>
-                    <p class="post-excerpt">
-                        {% if post.excerpt %}
-                            {{ post.excerpt | strip_html | truncate: 200 }}
-                        {% else %}
-                            {{ post.content | strip_html | truncate: 200 }}
-                        {% endif %}
-                    </p>
-                    {% if post.tags %}
-                    <div class="post-tags">
-                        {% for tag in post.tags %}
-                        <span class="tag">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    <a href="{{ post.url | relative_url }}" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
-                </div>
-            </article>
-            {% endfor %}
-        </div>
-
-        <!-- Empty State -->
-        <div class="no-posts" id="no-posts" style="display: none;">
-            <div class="empty-state">
-                <i class="fas fa-search"></i>
-                <h3>No posts found</h3>
-                <p>Try selecting a different category or check back later for new content.</p>
+                </p>
+                <a href="{{ post.url | relative_url }}" class="read-more">
+                    Read more <i class="fas fa-arrow-right" style="font-size:11px"></i>
+                </a>
             </div>
-        </div>
+        </article>
+        {% endfor %}
     </div>
-</section>
-
-<!-- Newsletter Signup -->
-<section class="newsletter-section">
-    <div class="container">
-        <div class="newsletter-card">
-            <div class="newsletter-content">
-                <h3>Stay Updated</h3>
-                <p>Get notified when I publish new blog posts about my adventures and experiences.</p>
-            </div>
-            <form class="newsletter-form">
-                <input type="email" placeholder="Enter your email" required>
-                <button type="submit">Subscribe</button>
-            </form>
-        </div>
+    {% else %}
+    <div style="text-align:center; padding: 80px 0;">
+        <i class="fas fa-pen" style="font-size:48px; color:var(--gray-dim); display:block; margin-bottom:24px;"></i>
+        <p style="color:var(--gray); font-size:16px;">No posts yet &mdash; check back soon.</p>
     </div>
-</section>
+    {% endif %}
 
-<script src="{{ '/blog.js' | relative_url }}"></script>
-<script src="{{ '/jekyll-blog.js' | relative_url }}"></script>
+</div>
+
+<script>
+// Category filter
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(function(b) {
+            b.classList.remove('active');
+        });
+        this.classList.add('active');
+        var filter = this.dataset.filter;
+        document.querySelectorAll('.post-card').forEach(function(card) {
+            if (filter === 'all' || card.dataset.category === filter) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
