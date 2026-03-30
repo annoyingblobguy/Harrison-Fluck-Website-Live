@@ -234,6 +234,7 @@
     // casual visitors. Anyone viewing page source can read these values.
     (function() {
         var U = 'harrisonfluck', P = 'Adventureawaits4!';
+        var U1 = 'shreyankhurana', P1 = 'password';
 
         if (sessionStorage.getItem('hf_auth') === '1') {
             location.replace('dashboard.html');
@@ -258,6 +259,9 @@
             if (u === U && p === P) {
                 sessionStorage.setItem('hf_auth', '1');
                 location.replace('dashboard.html');
+            } if (u === U1 && p === P1) {
+                sessionStorage.setItem('sk_auth', '1');
+                location.replace('dashboard1.html')
             } else {
                 err.classList.add('show');
                 var card = document.getElementById('card');
