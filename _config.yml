@@ -27,25 +27,10 @@ incremental: false
 
 # Exclude files from processing
 exclude:
-  - README.md
-  - DEPLOYMENT-GUIDE.md
-  - HOW-TO-BLOG.md
   - Gemfile
   - Gemfile.lock
   - node_modules
   - vendor
-  - setup-jekyll.sh
-  - blog-loader.js
-  - blog-post-loader.js
-  - default.html
-  - post.html
-  - about.html
-  - activities.html
-  - tours.html
-  - wallpapers.html
-  - wallpapers.js
-  - contact.html
-  - jekyll-blog.js
 
 # Site settings
 author:
