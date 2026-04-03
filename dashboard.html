@@ -576,6 +576,21 @@
             <button class="sb-btn" data-tool="paste">
                 <i class="fas fa-paste"></i> Pastebin
             </button>
+            <button class="sb-btn" data-tool="httpreq">
+                <i class="fas fa-paper-plane"></i> HTTP Request
+            </button>
+            <button class="sb-btn" data-tool="jwt">
+                <i class="fas fa-shield-alt"></i> JWT Decoder
+            </button>
+            <button class="sb-btn" data-tool="urlenc">
+                <i class="fas fa-link"></i> URL Encoder
+            </button>
+            <button class="sb-btn" data-tool="uuid">
+                <i class="fas fa-fingerprint"></i> UUID Generator
+            </button>
+            <button class="sb-btn" data-tool="curl">
+                <i class="fas fa-terminal"></i> cURL → Fetch
+            </button>
         </div>
 
         <div class="sb-section">
@@ -1137,6 +1152,172 @@ background-color: #2997ff;</div>
             </div>
         </div>
 
+        <!-- ══ HTTP Request Builder ══ -->
+        <div class="tool-panel" id="panel-httpreq">
+            <div class="tool-header">
+                <h2>HTTP Request Builder</h2>
+                <p>Send GET/POST requests and inspect JSON responses — no curl required.</p>
+            </div>
+            <div class="db-row" style="align-items:flex-end">
+                <div class="db-field" style="width:130px">
+                    <label class="db-label">Method</label>
+                    <select class="db-select" id="http-method" style="width:100%" onchange="httpToggleBody()">
+                        <option>GET</option>
+                        <option>POST</option>
+                        <option>PUT</option>
+                        <option>PATCH</option>
+                        <option>DELETE</option>
+                    </select>
+                </div>
+                <div class="db-field" style="flex:1">
+                    <label class="db-label">URL</label>
+                    <input class="db-input" type="url" id="http-url" placeholder="https://api.example.com/endpoint" style="font-family:'SF Mono',monospace">
+                </div>
+                <div style="margin-bottom:0">
+                    <button class="db-btn" onclick="sendHttpRequest()"><i class="fas fa-paper-plane"></i> Send</button>
+                </div>
+            </div>
+            <div class="db-grid-2">
+                <div class="db-field">
+                    <label class="db-label">Headers <span style="text-transform:none;font-weight:400;color:var(--gray)">(key: value, one per line)</span></label>
+                    <textarea class="db-textarea" id="http-headers" style="min-height:100px" placeholder="Content-Type: application/json&#10;Authorization: Bearer token"></textarea>
+                </div>
+                <div class="db-field" id="http-body-wrap">
+                    <label class="db-label">Body <span style="text-transform:none;font-weight:400;color:var(--gray)">(JSON)</span></label>
+                    <textarea class="db-textarea" id="http-body" style="min-height:100px" placeholder='{"key": "value"}'></textarea>
+                </div>
+            </div>
+            <div id="http-error" style="font-size:13px; color:#ff453a; margin-top:8px; display:none"></div>
+            <div id="http-result" style="display:none">
+                <div class="db-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
+                        <h4 style="margin:0">Response</h4>
+                        <div style="display:flex; align-items:center; gap:8px">
+                            <span id="http-status-badge" class="badge badge-gray">—</span>
+                            <span id="http-time" style="font-size:12px; color:var(--gray)"></span>
+                        </div>
+                    </div>
+                    <div class="db-field">
+                        <label class="db-label">Body</label>
+                        <textarea class="db-textarea" id="http-resp-body" style="min-height:200px; font-size:12px" readonly></textarea>
+                    </div>
+                    <div>
+                        <label class="db-label">Response Headers</label>
+                        <div class="db-output" id="http-resp-headers" style="font-size:12px; max-height:140px; overflow-y:auto"></div>
+                    </div>
+                </div>
+            </div>
+            <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> CORS restrictions may block cross-origin requests. Use a public API or one with CORS headers enabled.</p>
+        </div>
+
+        <!-- ══ JWT Decoder ══ -->
+        <div class="tool-panel" id="panel-jwt">
+            <div class="tool-header">
+                <h2>JWT Decoder</h2>
+                <p>Paste a JSON Web Token to decode its header, payload, and signature.</p>
+            </div>
+            <div class="db-field">
+                <label class="db-label">JWT Token</label>
+                <textarea class="db-textarea" id="jwt-input" style="min-height:100px; word-break:break-all" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+            </div>
+            <div class="db-btn-row">
+                <button class="db-btn" onclick="decodeJWT()"><i class="fas fa-unlock-alt"></i> Decode</button>
+                <button class="db-btn-ghost" onclick="document.getElementById('jwt-input').value='';document.getElementById('jwt-result').style.display='none';document.getElementById('jwt-error').textContent=''"><i class="fas fa-times"></i> Clear</button>
+            </div>
+            <div id="jwt-error" style="font-size:13px; color:#ff453a; margin-top:8px;"></div>
+            <div id="jwt-result" style="display:none; margin-top:14px">
+                <div class="db-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+                        <h4 style="margin:0">Header</h4>
+                        <button class="db-btn-ghost" style="font-size:12px" onclick="copyVal('jwt-header-out')"><i class="fas fa-copy"></i> Copy</button>
+                    </div>
+                    <div class="db-output" id="jwt-header-out" style="min-height:0"></div>
+                </div>
+                <div class="db-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+                        <h4 style="margin:0">Payload</h4>
+                        <button class="db-btn-ghost" style="font-size:12px" onclick="copyVal('jwt-payload-out')"><i class="fas fa-copy"></i> Copy</button>
+                    </div>
+                    <div class="db-output" id="jwt-payload-out" style="min-height:0"></div>
+                    <div id="jwt-expiry" style="margin-top:10px; font-size:13px;"></div>
+                </div>
+                <div class="db-card">
+                    <h4>Signature</h4>
+                    <div class="db-output" id="jwt-sig-out" style="min-height:0; word-break:break-all; color:var(--gray)"></div>
+                    <p style="font-size:12px; color:var(--gray-dim); margin-top:8px; margin-bottom:0"><i class="fas fa-info-circle"></i> Signature verification requires the secret key and is not performed in the browser.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ URL Encoder / Decoder ══ -->
+        <div class="tool-panel" id="panel-urlenc">
+            <div class="tool-header">
+                <h2>URL Encoder / Decoder</h2>
+                <p>Encode or decode URL components using <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:12px">encodeURIComponent</code> / <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:12px">decodeURIComponent</code>.</p>
+            </div>
+            <div class="db-field">
+                <label class="db-label">Input</label>
+                <textarea class="db-textarea" id="urlenc-input" style="min-height:120px" placeholder="Paste a URL or text to encode/decode..."></textarea>
+            </div>
+            <div class="db-btn-row">
+                <button class="db-btn" onclick="urlEncode()"><i class="fas fa-lock"></i> Encode</button>
+                <button class="db-btn-ghost" onclick="urlDecode()"><i class="fas fa-unlock"></i> Decode</button>
+                <button class="db-btn-ghost" onclick="urlCopy()"><i class="fas fa-copy"></i> Copy output</button>
+                <button class="db-btn-ghost" onclick="document.getElementById('urlenc-input').value='';document.getElementById('urlenc-output').value='';document.getElementById('urlenc-status').textContent=''"><i class="fas fa-times"></i> Clear</button>
+            </div>
+            <div class="db-field" style="margin-top:14px">
+                <label class="db-label">Output</label>
+                <textarea class="db-textarea" id="urlenc-output" style="min-height:120px" readonly placeholder="Result will appear here..."></textarea>
+            </div>
+            <div id="urlenc-status" style="font-size:13px; margin-top:6px;"></div>
+        </div>
+
+        <!-- ══ UUID Generator ══ -->
+        <div class="tool-panel" id="panel-uuid">
+            <div class="tool-header">
+                <h2>UUID Generator</h2>
+                <p>Generate cryptographically random UUIDs (v4).</p>
+            </div>
+            <div class="db-row" style="align-items:flex-end; margin-bottom:14px">
+                <div class="db-field" style="width:140px; margin-bottom:0">
+                    <label class="db-label">Count</label>
+                    <input class="db-input" type="number" id="uuid-count" value="5" min="1" max="50" style="font-family:'SF Mono',monospace">
+                </div>
+                <div style="margin-bottom:0">
+                    <button class="db-btn" onclick="generateUUIDs()"><i class="fas fa-sync-alt"></i> Generate</button>
+                </div>
+            </div>
+            <div id="uuid-list" style="display:none">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+                    <label class="db-label" style="margin:0">Results</label>
+                    <button class="db-btn-ghost" style="font-size:12px" onclick="copyAllUUIDs()"><i class="fas fa-copy"></i> Copy all</button>
+                </div>
+                <div id="uuid-output" class="db-output" style="min-height:120px; cursor:default; user-select:all"></div>
+            </div>
+        </div>
+
+        <!-- ══ cURL → Fetch ══ -->
+        <div class="tool-panel" id="panel-curl">
+            <div class="tool-header">
+                <h2>cURL → Fetch</h2>
+                <p>Convert a cURL command into a JavaScript <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:13px">fetch()</code> call.</p>
+            </div>
+            <div class="db-field">
+                <label class="db-label">cURL command</label>
+                <textarea class="db-textarea" id="curl-input" style="min-height:140px" placeholder="curl -X POST https://api.example.com/users \&#10;  -H 'Content-Type: application/json' \&#10;  -d '{&quot;name&quot;: &quot;Alice&quot;}'"></textarea>
+            </div>
+            <div class="db-btn-row">
+                <button class="db-btn" onclick="convertCurl()"><i class="fas fa-exchange-alt"></i> Convert</button>
+                <button class="db-btn-ghost" onclick="copyCurlOutput()"><i class="fas fa-copy"></i> Copy output</button>
+                <button class="db-btn-ghost" onclick="document.getElementById('curl-input').value='';document.getElementById('curl-output').value='';document.getElementById('curl-error').textContent=''"><i class="fas fa-times"></i> Clear</button>
+            </div>
+            <div id="curl-error" style="font-size:13px; color:#ff453a; margin-top:8px;"></div>
+            <div class="db-field" style="margin-top:14px">
+                <label class="db-label">fetch() output</label>
+                <textarea class="db-textarea" id="curl-output" style="min-height:260px; font-size:13px" readonly placeholder="JavaScript fetch() call will appear here..."></textarea>
+            </div>
+        </div>
+
     </main>
 </div>
 
@@ -1167,7 +1348,9 @@ background-color: #2997ff;</div>
         net:'Network Toolkit', json:'JSON Formatter',
         base64:'Base64', colour:'Colour Picker', regex:'Regex Tester',
         timestamp:'Timestamp', paste:'Pastebin', metar:'METAR / TAF',
-        flights:'Flight Tracker', ip:'My IP', password:'Password Gen'
+        flights:'Flight Tracker', ip:'My IP', password:'Password Gen',
+        httpreq:'HTTP Request Builder', jwt:'JWT Decoder',
+        urlenc:'URL Encoder / Decoder', uuid:'UUID Generator', curl:'cURL → Fetch'
     };
 
     sbBtns.forEach(function(btn) {
@@ -1816,6 +1999,236 @@ background-color: #2997ff;</div>
         if (val && val !== 'Click generate to create a password') {
             navigator.clipboard.writeText(val); showToast('Password copied!');
         }
+    };
+
+    // ── HTTP Request Builder ──────────────────────────────────
+    window.httpToggleBody = function() {
+        var method = document.getElementById('http-method').value;
+        var wrap   = document.getElementById('http-body-wrap');
+        wrap.style.opacity = ['POST','PUT','PATCH'].includes(method) ? '1' : '0.4';
+    };
+    httpToggleBody();
+
+    document.getElementById('http-url').addEventListener('keydown', function(e) { if (e.key === 'Enter') sendHttpRequest(); });
+
+    window.sendHttpRequest = async function() {
+        var method  = document.getElementById('http-method').value;
+        var url     = document.getElementById('http-url').value.trim();
+        var hdrsRaw = document.getElementById('http-headers').value.trim();
+        var body    = document.getElementById('http-body').value.trim();
+        var errEl   = document.getElementById('http-error');
+        var result  = document.getElementById('http-result');
+        errEl.style.display  = 'none';
+        result.style.display = 'none';
+        if (!url) { errEl.textContent = 'Enter a URL.'; errEl.style.display = 'block'; return; }
+
+        var headers = {};
+        if (hdrsRaw) {
+            hdrsRaw.split('\n').forEach(function(line) {
+                var idx = line.indexOf(':');
+                if (idx > 0) headers[line.substring(0, idx).trim()] = line.substring(idx + 1).trim();
+            });
+        }
+
+        var opts = { method: method, headers: headers };
+        if (['POST','PUT','PATCH'].includes(method) && body) opts.body = body;
+
+        var t0 = Date.now();
+        try {
+            var resp    = await fetch(url, opts);
+            var elapsed = Date.now() - t0;
+            var text    = await resp.text();
+            var formatted = text;
+            try { formatted = JSON.stringify(JSON.parse(text), null, 2); } catch(e) {}
+            document.getElementById('http-resp-body').value = formatted;
+            var hdrLines = [];
+            resp.headers.forEach(function(v, k) { hdrLines.push(k + ': ' + v); });
+            document.getElementById('http-resp-headers').textContent = hdrLines.join('\n') || '(none)';
+            var badge = document.getElementById('http-status-badge');
+            badge.textContent = resp.status + ' ' + resp.statusText;
+            badge.className   = 'badge ' + (resp.ok ? 'badge-green' : 'badge-red');
+            document.getElementById('http-time').textContent = elapsed + ' ms';
+            result.style.display = 'block';
+        } catch(e) {
+            errEl.textContent    = 'Request failed: ' + e.message + '. This is likely a CORS error.';
+            errEl.style.display  = 'block';
+        }
+    };
+
+    // ── JWT Decoder ───────────────────────────────────────────
+    document.getElementById('jwt-input').addEventListener('input', decodeJWT);
+
+    window.decodeJWT = function() {
+        var token  = document.getElementById('jwt-input').value.trim();
+        var errEl  = document.getElementById('jwt-error');
+        var result = document.getElementById('jwt-result');
+        errEl.textContent    = '';
+        result.style.display = 'none';
+        if (!token) return;
+        var parts = token.split('.');
+        if (parts.length !== 3) { errEl.textContent = 'Invalid JWT: expected 3 parts separated by dots.'; return; }
+        function b64url(s) {
+            s = s.replace(/-/g, '+').replace(/_/g, '/');
+            while (s.length % 4) s += '=';
+            return atob(s);
+        }
+        try {
+            var header  = JSON.parse(b64url(parts[0]));
+            var payload = JSON.parse(b64url(parts[1]));
+            document.getElementById('jwt-header-out').textContent  = JSON.stringify(header, null, 2);
+            document.getElementById('jwt-payload-out').textContent = JSON.stringify(payload, null, 2);
+            document.getElementById('jwt-sig-out').textContent     = parts[2];
+            var expiryEl = document.getElementById('jwt-expiry');
+            if (payload.exp) {
+                var exp = new Date(payload.exp * 1000), now = new Date();
+                if (exp < now) {
+                    expiryEl.innerHTML = '<span class="badge badge-red"><i class="fas fa-times-circle"></i> Expired</span> <span style="font-size:12px;color:var(--gray);margin-left:6px">' + exp.toUTCString() + '</span>';
+                } else {
+                    var diff = Math.round((exp - now) / 1000);
+                    var diffStr = diff > 3600 ? Math.round(diff / 3600) + 'h' : diff + 's';
+                    expiryEl.innerHTML = '<span class="badge badge-green"><i class="fas fa-check-circle"></i> Valid</span> <span style="font-size:12px;color:var(--gray);margin-left:6px">expires ' + exp.toUTCString() + ' (' + diffStr + ' remaining)</span>';
+                }
+            } else {
+                expiryEl.textContent = '';
+            }
+            result.style.display = 'block';
+        } catch(e) {
+            errEl.textContent = 'Failed to decode: ' + e.message;
+        }
+    };
+
+    // ── URL Encoder / Decoder ─────────────────────────────────
+    window.urlEncode = function() {
+        var input  = document.getElementById('urlenc-input').value;
+        var status = document.getElementById('urlenc-status');
+        try {
+            document.getElementById('urlenc-output').value = encodeURIComponent(input);
+            status.innerHTML = '<span style="color:#30d158">Encoded.</span>';
+        } catch(e) {
+            status.innerHTML = '<span style="color:#ff453a">Error: ' + e.message + '</span>';
+        }
+    };
+
+    window.urlDecode = function() {
+        var input  = document.getElementById('urlenc-input').value;
+        var status = document.getElementById('urlenc-status');
+        try {
+            document.getElementById('urlenc-output').value = decodeURIComponent(input);
+            status.innerHTML = '<span style="color:#30d158">Decoded.</span>';
+        } catch(e) {
+            status.innerHTML = '<span style="color:#ff453a">Error: ' + e.message + '</span>';
+        }
+    };
+
+    window.urlCopy = function() {
+        var val = document.getElementById('urlenc-output').value;
+        if (val) { navigator.clipboard.writeText(val); showToast('Copied!'); }
+    };
+
+    // ── UUID Generator ────────────────────────────────────────
+    window.generateUUIDs = function() {
+        var count = Math.min(50, Math.max(1, parseInt(document.getElementById('uuid-count').value) || 1));
+        var uuids = [];
+        for (var i = 0; i < count; i++) {
+            if (crypto.randomUUID) {
+                uuids.push(crypto.randomUUID());
+            } else {
+                uuids.push('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = crypto.getRandomValues(new Uint8Array(1))[0] & 15;
+                    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+                }));
+            }
+        }
+        document.getElementById('uuid-output').textContent = uuids.join('\n');
+        document.getElementById('uuid-list').style.display = 'block';
+    };
+
+    window.copyAllUUIDs = function() {
+        var val = document.getElementById('uuid-output').textContent;
+        if (val) {
+            navigator.clipboard.writeText(val);
+            showToast('Copied ' + val.split('\n').filter(Boolean).length + ' UUIDs!');
+        }
+    };
+
+    // ── cURL → Fetch Converter ────────────────────────────────
+    window.convertCurl = function() {
+        var input  = document.getElementById('curl-input').value.trim();
+        var output = document.getElementById('curl-output');
+        var errEl  = document.getElementById('curl-error');
+        errEl.textContent = '';
+        output.value = '';
+        if (!input) { errEl.textContent = 'Enter a cURL command.'; return; }
+
+        // Normalize line continuations and whitespace
+        var cmd = input.replace(/\\\n\s*/g, ' ').replace(/\s+/g, ' ').trim();
+        cmd = cmd.replace(/^curl\s+/i, '');
+
+        var url = null, method = null, headers = [], data = null, isForm = false;
+
+        // Tokenize respecting quoted strings
+        var tokens = [], re = /(-[^\s'"]+|'[^']*'|"(?:[^"\\]|\\.)*"|\S+)/g, tm;
+        while ((tm = re.exec(cmd)) !== null) tokens.push(tm[1]);
+
+        function unq(s) {
+            if ((s[0] === "'" && s[s.length-1] === "'") || (s[0] === '"' && s[s.length-1] === '"'))
+                return s.slice(1,-1).replace(/\\(.)/g, '$1');
+            return s;
+        }
+
+        for (var i = 0; i < tokens.length; i++) {
+            var t = tokens[i];
+            if (t === '-X' || t === '--request')                              { method = tokens[++i] && unq(tokens[i]); }
+            else if (t === '-H' || t === '--header')                           { var h = tokens[++i] && unq(tokens[i]); if (h) headers.push(h); }
+            else if (t === '-d' || t === '--data' || t === '--data-raw' || t === '--data-ascii') { data = tokens[++i] && unq(tokens[i]); }
+            else if (t === '-F' || t === '--form')                             { data = tokens[++i] && unq(tokens[i]); isForm = true; }
+            else if (t === '--json')                                            { data = tokens[++i] && unq(tokens[i]); headers.push('Content-Type: application/json'); headers.push('Accept: application/json'); }
+            else if (!t.startsWith('-'))                                       { url = unq(t); }
+        }
+
+        if (!url) { errEl.textContent = 'Could not find a URL in the cURL command.'; return; }
+        if (!method) method = data ? 'POST' : 'GET';
+
+        // Remove duplicate headers (--json may have added them)
+        headers = headers.filter(function(h, i, a) { return a.indexOf(h) === i; });
+
+        var lines = [];
+        var hasBody = ['POST','PUT','PATCH'].includes(method) && data;
+        lines.push("fetch('" + url + "', {");
+        lines.push("  method: '" + method + "',");
+        if (headers.length) {
+            lines.push('  headers: {');
+            headers.forEach(function(h, idx) {
+                var c = h.indexOf(':');
+                if (c > 0) {
+                    var k = h.substring(0,c).trim(), v = h.substring(c+1).trim();
+                    lines.push("    '" + k + "': '" + v.replace(/'/g,"\\'") + "'" + (idx < headers.length-1 ? ',' : ''));
+                }
+            });
+            lines.push('  }' + (hasBody ? ',' : ''));
+        }
+        if (hasBody) {
+            if (isForm) {
+                lines.push("  // FormData — convert manually if needed");
+                lines.push("  body: '" + data.replace(/\\/g,'\\\\').replace(/'/g,"\\'") + "'");
+            } else {
+                var parsed = null;
+                try { parsed = JSON.parse(data); } catch(e) {}
+                lines.push(parsed !== null
+                    ? '  body: JSON.stringify(' + JSON.stringify(parsed, null, 4).split('\n').join('\n  ') + ')'
+                    : "  body: '" + data.replace(/\\/g,'\\\\').replace(/'/g,"\\'") + "'");
+            }
+        }
+        lines.push('})');
+        lines.push('.then(res => res.json())');
+        lines.push('.then(data => console.log(data))');
+        lines.push('.catch(err => console.error(err));');
+        output.value = lines.join('\n');
+    };
+
+    window.copyCurlOutput = function() {
+        var val = document.getElementById('curl-output').value;
+        if (val) { navigator.clipboard.writeText(val); showToast('Copied!'); }
     };
 
     // ── Toast ─────────────────────────────────────────────────
