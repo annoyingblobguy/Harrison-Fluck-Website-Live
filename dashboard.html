@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
     /* ─── Dashboard layout ──────────────────────────────────── */
     :root { --sb: 232px; --hdr: 52px; }
@@ -446,7 +448,34 @@
         gap: 0;
         border-bottom: 1px solid var(--border);
         margin-bottom: 4px;
+        overflow-x: auto;
+        scrollbar-width: none;
     }
+    .net-tabs::-webkit-scrollbar { display: none; }
+
+    /* Geolocation map */
+    #geoip-map { height: 260px; border-radius: 10px; margin-top: 14px; }
+
+    /* Traceroute hops */
+    .hop-row { display: flex; align-items: center; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .hop-row:last-child { border-bottom: none; }
+    .hop-num { color: var(--gray-dim); font-size: 11px; width: 22px; text-align: right; flex-shrink: 0; }
+    .hop-host { flex: 1; color: var(--white); font-family: 'SF Mono', monospace; font-size: 12px; word-break: break-all; }
+    .hop-loss { width: 48px; text-align: right; color: var(--gray); font-size: 12px; flex-shrink: 0; }
+    .hop-latency { width: 52px; text-align: right; font-family: 'SF Mono', monospace; font-size: 12px; flex-shrink: 0; }
+    .hop-bar-wrap { width: 80px; flex-shrink: 0; }
+    .hop-bar { height: 6px; border-radius: 3px; background: var(--blue); opacity: 0.8; }
+
+    /* SSL grade badge */
+    .ssl-grade { font-size: 48px; font-weight: 800; line-height: 1; padding: 10px 0 4px; }
+    .ssl-grade.grade-a { color: #30d158; }
+    .ssl-grade.grade-b { color: #ffd60a; }
+    .ssl-grade.grade-c { color: #ff9f0a; }
+    .ssl-grade.grade-f { color: #ff453a; }
+    .ssl-grade.grade-t { color: #ff453a; }
+
+    /* Header category labels */
+    .hdr-cat { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray-dim); margin: 14px 0 4px; }
 
     .net-tab {
         padding: 9px 18px;
@@ -630,6 +659,11 @@
                 <button class="net-tab" data-net="ping"><i class="fas fa-satellite-dish" style="margin-right:6px;font-size:11px"></i>Ping</button>
                 <button class="net-tab" data-net="port"><i class="fas fa-plug" style="margin-right:6px;font-size:11px"></i>Port Check</button>
                 <button class="net-tab" data-net="whois"><i class="fas fa-info-circle" style="margin-right:6px;font-size:11px"></i>WHOIS</button>
+                <button class="net-tab" data-net="traceroute"><i class="fas fa-route" style="margin-right:6px;font-size:11px"></i>Traceroute</button>
+                <button class="net-tab" data-net="geoip"><i class="fas fa-map-marker-alt" style="margin-right:6px;font-size:11px"></i>IP Geo</button>
+                <button class="net-tab" data-net="ssl"><i class="fas fa-shield-alt" style="margin-right:6px;font-size:11px"></i>SSL Cert</button>
+                <button class="net-tab" data-net="uptime"><i class="fas fa-heartbeat" style="margin-right:6px;font-size:11px"></i>Status</button>
+                <button class="net-tab" data-net="headers"><i class="fas fa-list-ul" style="margin-right:6px;font-size:11px"></i>Headers</button>
             </div>
 
             <!-- DNS Lookup -->
@@ -735,6 +769,120 @@
                     <div id="whois-result-body"></div>
                 </div>
                 <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Queries via RDAP protocol. TLDs with no RDAP support may not return results.</p>
+            </div>
+
+            <!-- Traceroute -->
+            <div class="net-panel" id="net-traceroute">
+                <div class="db-row" style="margin-top:16px">
+                    <div class="db-field" style="flex:1">
+                        <label class="db-label">Host</label>
+                        <input class="db-input" type="text" id="traceroute-host" placeholder="example.com or 8.8.8.8">
+                    </div>
+                    <div style="margin-bottom:0">
+                        <button class="db-btn" onclick="doTraceroute()"><i class="fas fa-route"></i> Trace</button>
+                    </div>
+                </div>
+                <div id="traceroute-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div class="db-card" id="traceroute-result" style="margin-top:14px; display:none">
+                    <h4 id="traceroute-result-title">Hops</h4>
+                    <div id="traceroute-result-body"></div>
+                </div>
+                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> MTR-style traceroute via HackerTarget. Shows each hop with avg latency and packet loss.</p>
+            </div>
+
+            <!-- IP Geolocation -->
+            <div class="net-panel" id="net-geoip">
+                <div class="db-row" style="margin-top:16px">
+                    <div class="db-field" style="flex:1">
+                        <label class="db-label">IP address or domain</label>
+                        <input class="db-input" type="text" id="geoip-query" placeholder="8.8.8.8 or example.com">
+                    </div>
+                    <div style="margin-bottom:0">
+                        <button class="db-btn" onclick="doGeoIP()"><i class="fas fa-map-marker-alt"></i> Locate</button>
+                    </div>
+                </div>
+                <div id="geoip-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="geoip-result" style="display:none">
+                    <div id="geoip-map"></div>
+                    <div class="db-card" style="margin-top:12px">
+                        <div id="geoip-result-body"></div>
+                    </div>
+                </div>
+                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Geolocation via ipapi.co. Map shows approximate location — accuracy varies by ISP.</p>
+            </div>
+
+            <!-- SSL Certificate Checker -->
+            <div class="net-panel" id="net-ssl">
+                <div class="db-row" style="margin-top:16px">
+                    <div class="db-field" style="flex:1">
+                        <label class="db-label">Domain</label>
+                        <input class="db-input" type="text" id="ssl-domain" placeholder="example.com">
+                    </div>
+                    <div style="margin-bottom:0">
+                        <button class="db-btn" onclick="checkSSL()"><i class="fas fa-shield-alt"></i> Check</button>
+                    </div>
+                </div>
+                <div id="ssl-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="ssl-result" style="display:none">
+                    <div class="db-grid-3" style="margin-top:14px">
+                        <div class="db-card" style="text-align:center">
+                            <div class="db-label">Grade</div>
+                            <div class="ssl-grade" id="ssl-grade-val">—</div>
+                            <div id="ssl-grade-sub" style="font-size:12px; color:var(--gray); margin-top:4px"></div>
+                        </div>
+                        <div class="db-card">
+                            <div class="db-label">Certificate</div>
+                            <div id="ssl-cert-body" style="margin-top:6px"></div>
+                        </div>
+                        <div class="db-card">
+                            <div class="db-label">Expiry</div>
+                            <div id="ssl-expiry-body" style="margin-top:6px"></div>
+                        </div>
+                    </div>
+                    <div class="db-card" style="margin-top:0">
+                        <div id="ssl-details-body"></div>
+                    </div>
+                </div>
+                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Powered by SSL Labs API. Uses cached results (≤24h). First-time scans may take 30–60s.</p>
+            </div>
+
+            <!-- Website Status Monitor -->
+            <div class="net-panel" id="net-uptime">
+                <div class="db-row" style="margin-top:16px">
+                    <div class="db-field" style="flex:1">
+                        <label class="db-label">URL</label>
+                        <input class="db-input" type="text" id="uptime-url" placeholder="https://example.com">
+                    </div>
+                    <div style="margin-bottom:0">
+                        <button class="db-btn" onclick="checkUptime()"><i class="fas fa-heartbeat"></i> Check</button>
+                    </div>
+                </div>
+                <div id="uptime-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div class="db-card" id="uptime-result" style="margin-top:14px; display:none">
+                    <div id="uptime-result-body"></div>
+                </div>
+                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Combines a browser-side reachability check with a server-side header fetch for dual verification.</p>
+            </div>
+
+            <!-- Headers Inspector -->
+            <div class="net-panel" id="net-headers">
+                <div class="db-row" style="margin-top:16px">
+                    <div class="db-field" style="flex:1">
+                        <label class="db-label">URL</label>
+                        <input class="db-input" type="text" id="headers-url" placeholder="https://example.com">
+                    </div>
+                    <div style="margin-bottom:0">
+                        <button class="db-btn" onclick="inspectHeaders()"><i class="fas fa-list-ul"></i> Inspect</button>
+                    </div>
+                </div>
+                <div id="headers-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="headers-result" style="display:none">
+                    <div class="db-card" style="margin-top:14px">
+                        <div id="headers-summary"></div>
+                    </div>
+                    <div id="headers-result-body"></div>
+                </div>
+                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Fetches response headers via HackerTarget. Headers are grouped by category for readability.</p>
             </div>
         </div>
 
@@ -1380,6 +1528,8 @@ background-color: #2997ff;</div>
             this.classList.add('active');
             var panel = document.getElementById('net-' + this.dataset.net);
             if (panel) panel.classList.add('active');
+            // Invalidate Leaflet map size when geoip tab becomes visible
+            if (this.dataset.net === 'geoip' && _geoMap) { setTimeout(function() { _geoMap.invalidateSize(); }, 50); }
         });
     });
 
@@ -1389,6 +1539,11 @@ background-color: #2997ff;</div>
     document.getElementById('port-host').addEventListener('keydown', function(e) { if (e.key==='Enter') checkPort(); });
     document.getElementById('port-port').addEventListener('keydown', function(e) { if (e.key==='Enter') checkPort(); });
     document.getElementById('whois-query').addEventListener('keydown', function(e) { if (e.key==='Enter') doWhois(); });
+    document.getElementById('traceroute-host').addEventListener('keydown', function(e) { if (e.key==='Enter') doTraceroute(); });
+    document.getElementById('geoip-query').addEventListener('keydown', function(e) { if (e.key==='Enter') doGeoIP(); });
+    document.getElementById('ssl-domain').addEventListener('keydown', function(e) { if (e.key==='Enter') checkSSL(); });
+    document.getElementById('uptime-url').addEventListener('keydown', function(e) { if (e.key==='Enter') checkUptime(); });
+    document.getElementById('headers-url').addEventListener('keydown', function(e) { if (e.key==='Enter') inspectHeaders(); });
 
     // DNS Lookup via Cloudflare DoH
     window.dnsLookup = function() {
@@ -1592,6 +1747,363 @@ background-color: #2997ff;</div>
             })
             .catch(function(e) {
                 errEl.textContent = 'WHOIS lookup failed: ' + e.message + '. Try without "www" prefix.';
+                errEl.style.display = 'block';
+                result.style.display = 'none';
+            });
+    };
+
+    // ── Traceroute (MTR via HackerTarget) ─────────────────────
+    window.doTraceroute = function() {
+        var host   = document.getElementById('traceroute-host').value.trim().replace(/^https?:\/\//, '').split('/')[0];
+        var result = document.getElementById('traceroute-result');
+        var errEl  = document.getElementById('traceroute-error');
+        result.style.display = 'none';
+        errEl.style.display  = 'none';
+        if (!host) { errEl.textContent = 'Enter a host.'; errEl.style.display = 'block'; return; }
+
+        document.getElementById('traceroute-result-title').textContent = 'Traceroute — ' + host;
+        document.getElementById('traceroute-result-body').innerHTML =
+            '<p style="color:var(--gray);font-size:14px"><i class="fas fa-spinner fa-spin"></i> Tracing route to ' + host + '… (may take 10–20s)</p>';
+        result.style.display = 'block';
+
+        fetch('https://api.hackertarget.com/mtr/?q=' + encodeURIComponent(host))
+            .then(function(r) { return r.text(); })
+            .then(function(text) {
+                if (/error|API count/i.test(text)) {
+                    errEl.textContent = 'HackerTarget rate limit reached. Wait a minute and try again.';
+                    errEl.style.display = 'block';
+                    result.style.display = 'none';
+                    return;
+                }
+                var lines = text.split('\n').filter(function(l) { return /^\s*\d+\./.test(l); });
+                if (!lines.length) {
+                    document.getElementById('traceroute-result-body').innerHTML =
+                        '<p style="color:var(--gray);font-size:14px">No hops found — host may be unreachable.</p>';
+                    return;
+                }
+                var maxAvg = 0;
+                var hops = lines.map(function(line) {
+                    var parts = line.trim().split(/\s+/);
+                    var num   = parts[0].replace(/[^0-9]/g, '');
+                    var iface = parts[1] || '???';
+                    var loss  = parts[2] || '?%';
+                    var avg   = parseFloat(parts[5]) || 0;
+                    if (avg > maxAvg) maxAvg = avg;
+                    return { num: num, iface: iface, loss: loss, avg: avg };
+                });
+                document.getElementById('traceroute-result-body').innerHTML = hops.map(function(h) {
+                    var barW = maxAvg > 0 ? Math.max(4, Math.round((h.avg / maxAvg) * 80)) : 4;
+                    var latColor = h.avg < 20 ? '#30d158' : h.avg < 80 ? '#ffd60a' : '#ff453a';
+                    return '<div class="hop-row">' +
+                        '<span class="hop-num">' + h.num + '</span>' +
+                        '<span class="hop-host">' + h.iface + '</span>' +
+                        '<span class="hop-loss" style="color:' + (parseFloat(h.loss)>0?'#ff9f0a':'var(--gray)') + '">' + h.loss + '</span>' +
+                        '<span class="hop-latency" style="color:' + latColor + '">' + (h.avg ? h.avg.toFixed(1) + 'ms' : '—') + '</span>' +
+                        '<div class="hop-bar-wrap"><div class="hop-bar" style="width:' + barW + 'px;background:' + latColor + '"></div></div>' +
+                        '</div>';
+                }).join('');
+            })
+            .catch(function(e) {
+                errEl.textContent = 'Traceroute failed: ' + e.message;
+                errEl.style.display = 'block';
+                result.style.display = 'none';
+            });
+    };
+
+    // ── IP Geolocation (ipapi.co + Leaflet) ───────────────────
+    var _geoMap = null;
+    var _geoMarker = null;
+
+    window.doGeoIP = function() {
+        var query  = document.getElementById('geoip-query').value.trim().replace(/^https?:\/\//, '').split('/')[0];
+        var result = document.getElementById('geoip-result');
+        var errEl  = document.getElementById('geoip-error');
+        result.style.display = 'none';
+        errEl.style.display  = 'none';
+        if (!query) { errEl.textContent = 'Enter an IP address or domain.'; errEl.style.display = 'block'; return; }
+
+        fetch('https://ipapi.co/' + encodeURIComponent(query) + '/json/')
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.error) { errEl.textContent = d.reason || 'Lookup failed.'; errEl.style.display = 'block'; return; }
+
+                result.style.display = 'block';
+
+                // Map
+                var lat = d.latitude, lng = d.longitude;
+                if (lat && lng) {
+                    setTimeout(function() {
+                        if (!_geoMap) {
+                            _geoMap = L.map('geoip-map').setView([lat, lng], 10);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '© OpenStreetMap contributors', maxZoom: 18
+                            }).addTo(_geoMap);
+                            _geoMarker = L.marker([lat, lng]).addTo(_geoMap);
+                        } else {
+                            _geoMap.setView([lat, lng], 10);
+                            if (_geoMarker) _geoMarker.setLatLng([lat, lng]);
+                            _geoMap.invalidateSize();
+                        }
+                        _geoMarker.bindPopup('<b>' + (d.city || '') + '</b><br>' + (d.country_name || '')).openPopup();
+                    }, 50);
+                }
+
+                var rows = [];
+                if (d.ip)           rows.push(['IP Address', d.ip]);
+                if (d.city)         rows.push(['City', d.city]);
+                if (d.region)       rows.push(['Region', d.region]);
+                if (d.country_name) rows.push(['Country', d.country_name + ' ' + (d.country_code || '')]);
+                if (d.postal)       rows.push(['Postal code', d.postal]);
+                if (d.timezone)     rows.push(['Timezone', d.timezone]);
+                if (d.org)          rows.push(['ISP / Org', d.org]);
+                if (d.asn)          rows.push(['ASN', d.asn]);
+                if (lat && lng)     rows.push(['Coordinates', lat.toFixed(4) + ', ' + lng.toFixed(4)]);
+
+                document.getElementById('geoip-result-body').innerHTML = rows.map(function(r) {
+                    return '<div class="db-info-row"><span class="lbl">' + r[0] + '</span><span class="val">' + r[1] + '</span></div>';
+                }).join('');
+            })
+            .catch(function(e) {
+                errEl.textContent = 'Geolocation lookup failed: ' + e.message;
+                errEl.style.display = 'block';
+            });
+    };
+
+    // ── SSL Certificate Checker (SSL Labs API) ─────────────────
+    var _sslPollTimer = null;
+
+    window.checkSSL = function() {
+        var domain = document.getElementById('ssl-domain').value.trim().replace(/^https?:\/\//, '').split('/')[0];
+        var result = document.getElementById('ssl-result');
+        var errEl  = document.getElementById('ssl-error');
+        result.style.display = 'none';
+        errEl.style.display  = 'none';
+        if (!domain) { errEl.textContent = 'Enter a domain name.'; errEl.style.display = 'block'; return; }
+        if (_sslPollTimer) { clearInterval(_sslPollTimer); _sslPollTimer = null; }
+
+        document.getElementById('ssl-grade-val').textContent = '…';
+        document.getElementById('ssl-grade-val').className = 'ssl-grade';
+        document.getElementById('ssl-grade-sub').textContent = 'Scanning…';
+        document.getElementById('ssl-cert-body').innerHTML = '<p style="color:var(--gray);font-size:13px"><i class="fas fa-spinner fa-spin"></i> Fetching…</p>';
+        document.getElementById('ssl-expiry-body').innerHTML = '';
+        document.getElementById('ssl-details-body').innerHTML = '';
+        result.style.display = 'block';
+
+        function fetchSSL(startNew) {
+            var url = 'https://api.ssllabs.com/api/v3/analyze?host=' + encodeURIComponent(domain) +
+                      (startNew ? '&startNew=on' : '&fromCache=on&maxAge=24') + '&all=done';
+            fetch(url)
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.status === 'READY') {
+                        if (_sslPollTimer) { clearInterval(_sslPollTimer); _sslPollTimer = null; }
+                        renderSSL(domain, d);
+                    } else if (d.status === 'ERROR') {
+                        if (_sslPollTimer) { clearInterval(_sslPollTimer); _sslPollTimer = null; }
+                        errEl.textContent = 'SSL Labs error: ' + (d.statusMessage || 'Unknown error');
+                        errEl.style.display = 'block';
+                        result.style.display = 'none';
+                    } else {
+                        // IN_PROGRESS / DNS — start polling
+                        var msg = d.status === 'DNS' ? 'Resolving DNS…' : 'Scan in progress (' + (d.status||'') + ')…';
+                        document.getElementById('ssl-grade-sub').textContent = msg;
+                        if (!_sslPollTimer) {
+                            _sslPollTimer = setInterval(function() { fetchSSL(false); }, 8000);
+                        }
+                    }
+                })
+                .catch(function(e) {
+                    if (_sslPollTimer) { clearInterval(_sslPollTimer); _sslPollTimer = null; }
+                    // Try starting a fresh scan
+                    if (startNew) {
+                        errEl.textContent = 'SSL check failed: ' + e.message;
+                        errEl.style.display = 'block';
+                        result.style.display = 'none';
+                    } else {
+                        fetchSSL(true);
+                    }
+                });
+        }
+
+        fetchSSL(false);
+    };
+
+    function renderSSL(domain, d) {
+        var ep    = d.endpoints && d.endpoints[0];
+        var grade = ep ? ep.grade : '?';
+        var gradeEl = document.getElementById('ssl-grade-val');
+        gradeEl.textContent = grade || '?';
+        gradeEl.className = 'ssl-grade grade-' + (grade ? grade[0].toLowerCase() : 'f');
+        document.getElementById('ssl-grade-sub').textContent = ep && ep.hasWarnings ? 'Warnings present' : 'No warnings';
+
+        var cert = d.certs && d.certs[0];
+        if (cert) {
+            document.getElementById('ssl-cert-body').innerHTML =
+                '<div class="db-info-row" style="flex-direction:column;align-items:flex-start;gap:2px">' +
+                '<span class="lbl">Subject</span><span class="val" style="font-size:12px;word-break:break-all">' + (cert.subject||'—') + '</span></div>' +
+                '<div class="db-info-row" style="flex-direction:column;align-items:flex-start;gap:2px">' +
+                '<span class="lbl">Issuer</span><span class="val" style="font-size:12px">' + (cert.issuerLabel||'—') + '</span></div>' +
+                '<div class="db-info-row"><span class="lbl">Key</span><span class="val">' + (cert.keyAlg||'') + ' ' + (cert.keyStrength||'') + '-bit</span></div>';
+
+            var notAfter  = cert.notAfter  ? new Date(cert.notAfter)  : null;
+            var notBefore = cert.notBefore ? new Date(cert.notBefore) : null;
+            var now       = new Date();
+            var daysLeft  = notAfter ? Math.round((notAfter - now) / 86400000) : null;
+            var expiryColor = daysLeft === null ? 'var(--gray)' : daysLeft < 14 ? '#ff453a' : daysLeft < 30 ? '#ffd60a' : '#30d158';
+            document.getElementById('ssl-expiry-body').innerHTML =
+                (notBefore ? '<div class="db-info-row"><span class="lbl">Valid from</span><span class="val" style="font-size:12px">' + notBefore.toLocaleDateString() + '</span></div>' : '') +
+                (notAfter  ? '<div class="db-info-row"><span class="lbl">Expires</span><span class="val" style="font-size:12px">' + notAfter.toLocaleDateString() + '</span></div>' : '') +
+                (daysLeft !== null ? '<div class="db-info-row"><span class="lbl">Days left</span><span class="val" style="color:' + expiryColor + ';font-weight:700">' + daysLeft + ' days</span></div>' : '');
+        }
+
+        var detailRows = [];
+        if (ep && ep.ipAddress)      detailRows.push(['Server IP', ep.ipAddress]);
+        if (d.protocol)              detailRows.push(['Protocol', d.protocol]);
+        if (ep && ep.statusMessage)  detailRows.push(['Status', ep.statusMessage]);
+        detailRows.push(['Tested', new Date().toLocaleString()]);
+        document.getElementById('ssl-details-body').innerHTML = detailRows.map(function(r) {
+            return '<div class="db-info-row"><span class="lbl">' + r[0] + '</span><span class="val">' + r[1] + '</span></div>';
+        }).join('');
+    }
+
+    // ── Website Status Monitor ─────────────────────────────────
+    window.checkUptime = function() {
+        var raw    = document.getElementById('uptime-url').value.trim();
+        var errEl  = document.getElementById('uptime-error');
+        var result = document.getElementById('uptime-result');
+        errEl.style.display  = 'none';
+        result.style.display = 'none';
+
+        if (!raw) { errEl.textContent = 'Enter a URL.'; errEl.style.display = 'block'; return; }
+        var url  = /^https?:\/\//i.test(raw) ? raw : 'https://' + raw;
+        var host = url.replace(/^https?:\/\//, '').split('/')[0];
+
+        document.getElementById('uptime-result-body').innerHTML =
+            '<p style="color:var(--gray);font-size:14px"><i class="fas fa-spinner fa-spin"></i> Checking ' + host + '…</p>';
+        result.style.display = 'block';
+
+        // Browser-side reachability
+        var browserStart = Date.now();
+        var browserStatus = 'unknown';
+        var browserRtt = null;
+        var apiDone = false, browserDone = false;
+        var apiStatus = null, apiCode = null, apiServer = null;
+
+        function finish() {
+            if (!apiDone || !browserDone) return;
+            var up = apiStatus === 'up' || browserStatus === 'reachable';
+            var body = '<div class="db-info-row"><span class="lbl">Status</span><span class="val">' +
+                (up ? '<span class="badge badge-green">Online</span>' : '<span class="badge badge-red">Offline / Unreachable</span>') + '</span></div>' +
+                '<div class="db-info-row"><span class="lbl">Host</span><span class="val">' + host + '</span></div>';
+            if (apiCode)   body += '<div class="db-info-row"><span class="lbl">HTTP status</span><span class="val">' + apiCode + '</span></div>';
+            if (apiServer) body += '<div class="db-info-row"><span class="lbl">Server</span><span class="val">' + apiServer + '</span></div>';
+            if (browserRtt !== null) body += '<div class="db-info-row"><span class="lbl">Browser RTT</span><span class="val">' + browserRtt + ' ms</span></div>';
+            body += '<div class="db-info-row"><span class="lbl">Checked</span><span class="val">' + new Date().toLocaleTimeString() + '</span></div>';
+            document.getElementById('uptime-result-body').innerHTML = body;
+        }
+
+        // Browser check (no-cors)
+        fetch(url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now(), { method: 'HEAD', mode: 'no-cors', cache: 'no-store' })
+            .then(function() { browserStatus = 'reachable'; browserRtt = Date.now() - browserStart; })
+            .catch(function() { browserStatus = 'unreachable'; })
+            .finally(function() { browserDone = true; finish(); });
+
+        // Server-side check via HackerTarget headers
+        fetch('https://api.hackertarget.com/httpheaders/?q=' + encodeURIComponent(url))
+            .then(function(r) { return r.text(); })
+            .then(function(text) {
+                if (/error|API count/i.test(text)) { apiStatus = 'unknown'; apiDone = true; finish(); return; }
+                var codeMatch = text.match(/HTTP\/[\d.]+ (\d{3})/i);
+                if (codeMatch) { apiCode = codeMatch[1]; apiStatus = parseInt(codeMatch[1]) < 500 ? 'up' : 'down'; }
+                var srvMatch = text.match(/^[Ss]erver:\s*(.+)$/m);
+                if (srvMatch) apiServer = srvMatch[1].trim();
+                apiDone = true; finish();
+            })
+            .catch(function() { apiStatus = 'unknown'; apiDone = true; finish(); });
+    };
+
+    // ── Headers Inspector ──────────────────────────────────────
+    window.inspectHeaders = function() {
+        var raw   = document.getElementById('headers-url').value.trim();
+        var errEl = document.getElementById('headers-error');
+        var result = document.getElementById('headers-result');
+        errEl.style.display   = 'none';
+        result.style.display  = 'none';
+
+        if (!raw) { errEl.textContent = 'Enter a URL.'; errEl.style.display = 'block'; return; }
+        var url = /^https?:\/\//i.test(raw) ? raw : 'https://' + raw;
+
+        document.getElementById('headers-summary').innerHTML =
+            '<p style="color:var(--gray);font-size:14px"><i class="fas fa-spinner fa-spin"></i> Fetching headers…</p>';
+        result.style.display = 'block';
+        document.getElementById('headers-result-body').innerHTML = '';
+
+        fetch('https://api.hackertarget.com/httpheaders/?q=' + encodeURIComponent(url))
+            .then(function(r) { return r.text(); })
+            .then(function(text) {
+                if (/error|API count/i.test(text)) {
+                    errEl.textContent = 'HackerTarget rate limit reached. Wait a minute and try again.';
+                    errEl.style.display = 'block';
+                    result.style.display = 'none';
+                    return;
+                }
+
+                var lines = text.split('\n').filter(function(l) { return l.trim(); });
+                var statusLine = lines[0] || '';
+                var codeMatch  = statusLine.match(/HTTP\/[\d.]+ (\d{3}[^\r\n]*)/i);
+                var statusCode = codeMatch ? codeMatch[1] : statusLine;
+                var isOk       = /^[123]/.test(statusCode);
+
+                document.getElementById('headers-summary').innerHTML =
+                    '<div class="db-info-row"><span class="lbl">Status</span><span class="val">' +
+                    '<span class="badge ' + (isOk ? 'badge-green' : 'badge-red') + '">HTTP ' + statusCode + '</span>' +
+                    '</span></div>' +
+                    '<div class="db-info-row"><span class="lbl">URL</span><span class="val" style="word-break:break-all;font-size:12px">' + url + '</span></div>';
+
+                // Parse headers (skip first status line)
+                var headers = [];
+                lines.slice(1).forEach(function(line) {
+                    var sep = line.indexOf(':');
+                    if (sep < 0) return;
+                    var name = line.slice(0, sep).trim();
+                    var val  = line.slice(sep + 1).trim();
+                    if (name) headers.push({ name: name, val: val });
+                });
+
+                // Categorise
+                var cats = {
+                    'Security': ['strict-transport-security','content-security-policy','x-frame-options','x-content-type-options','x-xss-protection','referrer-policy','permissions-policy','cross-origin-opener-policy','cross-origin-resource-policy','cross-origin-embedder-policy'],
+                    'Caching':  ['cache-control','expires','etag','last-modified','age','pragma','vary'],
+                    'Server':   ['server','x-powered-by','via','x-forwarded-for','x-real-ip','host'],
+                    'Content':  ['content-type','content-length','content-encoding','content-language','transfer-encoding'],
+                    'Other':    []
+                };
+                var grouped = { Security: [], Caching: [], Server: [], Content: [], Other: [] };
+                headers.forEach(function(h) {
+                    var lower = h.name.toLowerCase();
+                    var found = false;
+                    ['Security','Caching','Server','Content'].forEach(function(cat) {
+                        if (!found && cats[cat].indexOf(lower) >= 0) { grouped[cat].push(h); found = true; }
+                    });
+                    if (!found) grouped.Other.push(h);
+                });
+
+                var html = '';
+                ['Security','Caching','Content','Server','Other'].forEach(function(cat) {
+                    if (!grouped[cat].length) return;
+                    html += '<div class="db-card" style="margin-top:10px"><div class="hdr-cat">' + cat + '</div>';
+                    grouped[cat].forEach(function(h) {
+                        html += '<div class="db-info-row"><span class="lbl" style="font-family:\'SF Mono\',monospace;font-size:11px">' +
+                            h.name + '</span><span class="val" style="font-size:12px;word-break:break-all;max-width:65%">' +
+                            h.val.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span></div>';
+                    });
+                    html += '</div>';
+                });
+
+                document.getElementById('headers-result-body').innerHTML = html || '<p style="color:var(--gray);font-size:14px">No headers returned.</p>';
+            })
+            .catch(function(e) {
+                errEl.textContent = 'Headers fetch failed: ' + e.message;
                 errEl.style.display = 'block';
                 result.style.display = 'none';
             });
