@@ -228,48 +228,53 @@
         </div>
     </div>
 
-    <script>
-    // NOTE: Credentials are stored in client-side JS — not a secure auth system.
-    // This is purely to keep the dashboard from being immediately visible to
-    // casual visitors. Anyone viewing page source can read these values.
-    (function() {
-        var U = 'harrisonfluck', P = 'Adventureawaits4!';
-        var U1 = 'shreyankhurana', P1 = 'password';
+    <script type="module">
+        const HASHES = {
+            harrisonfluck:  '5bac1bd961cd6f91c95b0b9beb614944d6f584674f40e1897fe4dbb52487ba6d',
+            shreyankhurana: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+        };
 
         if (sessionStorage.getItem('hf_auth') === '1') {
             location.replace('dashboard.html');
         }
 
+        async function hashPassword(pw) {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
         // Password toggle
-        var passEl  = document.getElementById('password');
-        var eyeEl   = document.getElementById('eye-toggle');
-        eyeEl.addEventListener('click', function() {
-            var show = passEl.type === 'password';
+        const passEl = document.getElementById('password');
+        const eyeEl  = document.getElementById('eye-toggle');
+        eyeEl.addEventListener('click', () => {
+            const show = passEl.type === 'password';
             passEl.type = show ? 'text' : 'password';
             eyeEl.className = 'field-icon ' + (show ? 'fas fa-eye-slash' : 'fas fa-eye');
         });
 
         // Submit
-        document.getElementById('login-form').addEventListener('submit', function(e) {
+        document.getElementById('login-form').addEventListener('submit', async e => {
             e.preventDefault();
-            var u   = document.getElementById('username').value.trim();
-            var p   = document.getElementById('password').value;
-            var err = document.getElementById('error-msg');
+            const u   = document.getElementById('username').value.trim().toLowerCase();
+            const p   = document.getElementById('password').value;
+            const err = document.getElementById('error-msg');
+            const hash = await hashPassword(p);
 
-            if (u === U && p === P) {
-                sessionStorage.setItem('hf_auth', '1');
-                location.replace('dashboard.html');
-            } if (u === U1 && p === P1) {
-                sessionStorage.setItem('sk_auth', '1');
-                location.replace('dashboard1.html')
+            if (HASHES[u] && HASHES[u] === hash) {
+                if (u === 'shreyankhurana') {
+                    sessionStorage.setItem('sk_auth', '1');
+                    location.replace('dashboard1.html');
+                } else {
+                    sessionStorage.setItem('hf_auth', '1');
+                    location.replace('dashboard.html');
+                }
             } else {
                 err.classList.add('show');
-                var card = document.getElementById('card');
+                const card = document.getElementById('card');
                 card.style.animation = 'shake 0.4s ease';
-                setTimeout(function() { card.style.animation = ''; }, 420);
+                setTimeout(() => { card.style.animation = ''; }, 420);
             }
         });
-    })();
     </script>
 </body>
 </html>

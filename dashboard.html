@@ -4,548 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — HF</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/dashboard.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-    /* ─── Dashboard layout ──────────────────────────────────── */
-    :root { --sb: 232px; --hdr: 52px; }
-    html, body { height: 100%; overflow: hidden; }
-
-    .db-wrap {
-        display: grid;
-        grid-template-columns: var(--sb) 1fr;
-        grid-template-rows: var(--hdr) 1fr;
-        height: 100vh;
-    }
-
-    /* Header */
-    .db-header {
-        grid-column: 1 / -1;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 20px 0 0;
-        background: rgba(6,9,20,0.9);
-        backdrop-filter: blur(20px);
-        border-bottom: 1px solid var(--border);
-        z-index: 10;
-    }
-
-    .db-header-left {
-        display: flex;
-        align-items: center;
-        height: 100%;
-    }
-
-    .db-logo {
-        width: var(--sb);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 0 18px;
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--white);
-        border-right: 1px solid var(--border);
-        height: 100%;
-        flex-shrink: 0;
-    }
-
-    .db-logo-icon {
-        width: 28px; height: 28px;
-        background: linear-gradient(135deg, #0a5fd8, #2997ff);
-        border-radius: 8px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 12px; font-weight: 800; color: #fff;
-        flex-shrink: 0;
-    }
-
-    .db-header-title {
-        padding-left: 16px;
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--white);
-    }
-
-    .db-header-title span {
-        color: var(--gray);
-        font-weight: 400;
-        font-size: 13px;
-    }
-
-    .db-header-right { display: flex; align-items: center; gap: 12px; }
-
-    .hdr-btn {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 7px 14px;
-        background: transparent;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        font-size: 13px; font-weight: 600;
-        color: var(--gray);
-        font-family: inherit;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .hdr-btn:hover {
-        border-color: var(--border-hi);
-        color: var(--white);
-    }
-
-    .hamburger-db {
-        display: none;
-        flex-direction: column; gap: 4px;
-        background: none; border: none; cursor: pointer; padding: 8px;
-    }
-
-    .hamburger-db span {
-        display: block; width: 20px; height: 2px;
-        background: var(--white); border-radius: 2px;
-    }
-
-    /* Sidebar */
-    .db-sidebar {
-        background: var(--bg-2);
-        border-right: 1px solid var(--border);
-        overflow-y: auto;
-        padding: 12px 0 24px;
-    }
-
-    .db-sidebar::-webkit-scrollbar { width: 4px; }
-    .db-sidebar::-webkit-scrollbar-track { background: transparent; }
-    .db-sidebar::-webkit-scrollbar-thumb { background: var(--gray-dim); border-radius: 2px; }
-
-    .sb-section { margin-bottom: 4px; }
-
-    .sb-section-label {
-        display: block;
-        font-size: 10px; font-weight: 700;
-        letter-spacing: 0.12em; text-transform: uppercase;
-        color: var(--gray-dim);
-        padding: 12px 18px 6px;
-    }
-
-    .sb-btn {
-        display: flex; align-items: center; gap: 10px;
-        width: 100%;
-        padding: 9px 18px;
-        background: none; border: none;
-        color: var(--gray);
-        font-size: 13px; font-weight: 500;
-        font-family: inherit;
-        cursor: pointer;
-        text-align: left;
-        transition: all 0.15s;
-        border-radius: 0;
-    }
-
-    .sb-btn i {
-        font-size: 13px;
-        width: 16px; text-align: center;
-        flex-shrink: 0;
-    }
-
-    .sb-btn:hover {
-        color: var(--white);
-        background: rgba(255,255,255,0.05);
-    }
-
-    .sb-btn.active {
-        color: var(--blue);
-        background: rgba(41,151,255,0.1);
-        font-weight: 600;
-    }
-
-    .sb-btn.active i { color: var(--blue); }
-
-    /* Main content */
-    .db-main {
-        overflow-y: auto;
-        background: var(--bg);
-        padding: 28px 32px;
-    }
-
-    .db-main::-webkit-scrollbar { width: 6px; }
-    .db-main::-webkit-scrollbar-track { background: transparent; }
-    .db-main::-webkit-scrollbar-thumb { background: var(--gray-dim); border-radius: 3px; }
-
-    /* Tool panels */
-    .tool-panel { display: none; }
-    .tool-panel.active { display: block; }
-
-    .tool-header { margin-bottom: 24px; }
-    .tool-header h2 {
-        font-size: 22px; font-weight: 700;
-        letter-spacing: -0.02em; color: var(--white);
-        margin-bottom: 4px;
-    }
-
-    .tool-header p { font-size: 14px; color: var(--gray); line-height: 1.6; }
-
-    /* Form controls */
-    .db-input {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 10px 14px;
-        font-size: 14px;
-        color: var(--white);
-        font-family: inherit;
-        outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        width: 100%;
-    }
-
-    .db-input:focus {
-        border-color: var(--blue);
-        box-shadow: 0 0 0 3px rgba(41,151,255,0.12);
-    }
-
-    .db-input::placeholder { color: var(--gray-dim); }
-
-    .db-textarea {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 12px 14px;
-        font-size: 13px; font-family: 'SF Mono', 'Fira Mono', monospace;
-        color: var(--white);
-        resize: vertical;
-        outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        width: 100%;
-        min-height: 140px;
-        line-height: 1.6;
-    }
-
-    .db-textarea:focus {
-        border-color: var(--blue);
-        box-shadow: 0 0 0 3px rgba(41,151,255,0.12);
-    }
-
-    .db-select {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 10px 14px;
-        font-size: 14px; font-family: inherit;
-        color: var(--white);
-        outline: none;
-        cursor: pointer;
-        transition: border-color 0.2s;
-    }
-
-    .db-select:focus { border-color: var(--blue); }
-    .db-select option { background: var(--surface-2); }
-
-    .db-btn {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 9px 18px;
-        background: var(--blue);
-        color: #fff;
-        border: none; border-radius: var(--radius-sm);
-        font-size: 13px; font-weight: 600; font-family: inherit;
-        cursor: pointer;
-        transition: all 0.2s;
-        letter-spacing: -0.01em;
-    }
-
-    .db-btn:hover { background: #3aa3ff; transform: translateY(-1px); }
-    .db-btn:active { transform: none; }
-
-    .db-btn-ghost {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 9px 18px;
-        background: transparent;
-        color: var(--gray);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        font-size: 13px; font-weight: 600; font-family: inherit;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .db-btn-ghost:hover { border-color: var(--border-hi); color: var(--white); }
-
-    .db-btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-
-    .db-label {
-        display: block;
-        font-size: 12px; font-weight: 700;
-        letter-spacing: 0.06em; text-transform: uppercase;
-        color: var(--gray-dim);
-        margin-bottom: 6px;
-    }
-
-    .db-field { margin-bottom: 14px; }
-
-    /* Cards */
-    .db-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 20px;
-        margin-bottom: 14px;
-    }
-
-    .db-card h4 {
-        font-size: 13px; font-weight: 700;
-        color: var(--white); margin-bottom: 10px;
-        letter-spacing: -0.01em;
-    }
-
-    .db-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .db-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
-
-    .db-row { display: flex; gap: 10px; align-items: flex-end; }
-    .db-row .db-field { flex: 1; margin-bottom: 0; }
-
-    /* Result / output box */
-    .db-output {
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 12px 14px;
-        font-family: 'SF Mono', 'Fira Mono', monospace;
-        font-size: 13px;
-        color: var(--white);
-        white-space: pre-wrap;
-        word-break: break-all;
-        min-height: 60px;
-        line-height: 1.6;
-    }
-
-    .db-info-row {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px solid var(--border);
-        font-size: 14px;
-    }
-
-    .db-info-row:last-child { border-bottom: none; }
-    .db-info-row .lbl { color: var(--gray-dim); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
-    .db-info-row .val { color: var(--white); font-weight: 500; font-family: 'SF Mono', monospace; font-size: 13px; }
-
-    /* Status/badge */
-    .badge {
-        display: inline-flex; align-items: center; gap: 5px;
-        padding: 3px 10px;
-        border-radius: 100px;
-        font-size: 11px; font-weight: 700;
-        letter-spacing: 0.04em; text-transform: uppercase;
-    }
-
-    .badge-blue  { background: rgba(41,151,255,0.15); color: var(--blue); }
-    .badge-green { background: rgba(48,209,88,0.15);  color: #30d158; }
-    .badge-red   { background: rgba(255,69,58,0.15);  color: #ff453a; }
-    .badge-gray  { background: rgba(142,142,147,0.15); color: #8e8e93; }
-
-    /* Tunnel card (used in flight tracker) */
-    .tunnel-card {
-        display: flex; align-items: flex-start; gap: 14px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 18px;
-        margin-bottom: 10px;
-        transition: border-color 0.2s;
-    }
-
-    .tunnel-card:hover { border-color: rgba(41,151,255,0.25); }
-
-    .tunnel-card-icon {
-        width: 40px; height: 40px; border-radius: 10px;
-        background: rgba(41,151,255,0.12);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 16px; color: var(--blue); flex-shrink: 0;
-    }
-
-    .tunnel-card h4 { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
-    .tunnel-card p  { font-size: 13px; color: var(--gray); line-height: 1.6; margin-bottom: 10px; }
-
-    /* Colour picker */
-    .colour-swatch {
-        width: 100%; height: 80px;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        margin-bottom: 14px;
-        transition: background 0.1s;
-    }
-
-    .colour-input-wrap {
-        display: flex; gap: 10px; align-items: center; margin-bottom: 14px;
-    }
-
-    #colour-picker-input {
-        width: 48px; height: 40px;
-        padding: 2px; border: 1px solid var(--border);
-        border-radius: 8px; cursor: pointer;
-        background: var(--surface);
-    }
-
-    /* Password generator */
-    .pass-display {
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 16px 18px;
-        font-family: 'SF Mono', monospace;
-        font-size: 16px; font-weight: 600;
-        color: var(--white);
-        letter-spacing: 0.06em;
-        word-break: break-all;
-        margin-bottom: 14px;
-        min-height: 58px;
-        display: flex; align-items: center;
-    }
-
-    input[type=range] {
-        width: 100%;
-        -webkit-appearance: none;
-        height: 4px;
-        background: var(--surface-2);
-        border-radius: 2px;
-        outline: none;
-    }
-
-    input[type=range]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 16px; height: 16px;
-        border-radius: 50%;
-        background: var(--blue);
-        cursor: pointer;
-    }
-
-    .check-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--gray); margin-bottom: 8px; cursor: pointer; }
-    .check-row input { accent-color: var(--blue); width: 15px; height: 15px; }
-    .check-row:hover { color: var(--white); }
-
-    /* METAR */
-    .metar-raw {
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 14px 16px;
-        font-family: 'SF Mono', monospace;
-        font-size: 13px; color: #60d8ff;
-        word-break: break-all;
-        line-height: 1.7;
-        margin-bottom: 14px;
-    }
-
-    /* Regex */
-    .regex-match { background: rgba(255,214,10,0.25); border-radius: 3px; }
-
-    /* Network Toolkit tabs */
-    .net-tabs {
-        display: flex;
-        gap: 0;
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 4px;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-    .net-tabs::-webkit-scrollbar { display: none; }
-
-    /* Geolocation map */
-    #geoip-map { height: 260px; border-radius: 10px; margin-top: 14px; }
-
-    /* Traceroute hops */
-    .hop-row { display: flex; align-items: center; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-    .hop-row:last-child { border-bottom: none; }
-    .hop-num { color: var(--gray-dim); font-size: 11px; width: 22px; text-align: right; flex-shrink: 0; }
-    .hop-host { flex: 1; color: var(--white); font-family: 'SF Mono', monospace; font-size: 12px; word-break: break-all; }
-    .hop-loss { width: 48px; text-align: right; color: var(--gray); font-size: 12px; flex-shrink: 0; }
-    .hop-latency { width: 52px; text-align: right; font-family: 'SF Mono', monospace; font-size: 12px; flex-shrink: 0; }
-    .hop-bar-wrap { width: 80px; flex-shrink: 0; }
-    .hop-bar { height: 6px; border-radius: 3px; background: var(--blue); opacity: 0.8; }
-
-    /* SSL grade badge */
-    .ssl-grade { font-size: 48px; font-weight: 800; line-height: 1; padding: 10px 0 4px; }
-    .ssl-grade.grade-a { color: #30d158; }
-    .ssl-grade.grade-b { color: #ffd60a; }
-    .ssl-grade.grade-c { color: #ff9f0a; }
-    .ssl-grade.grade-f { color: #ff453a; }
-    .ssl-grade.grade-t { color: #ff453a; }
-
-    /* Header category labels */
-    .hdr-cat { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray-dim); margin: 14px 0 4px; }
-
-    .net-tab {
-        padding: 9px 18px;
-        background: none;
-        border: none;
-        border-bottom: 2px solid transparent;
-        color: var(--gray);
-        font-size: 13px; font-weight: 600;
-        font-family: inherit;
-        cursor: pointer;
-        margin-bottom: -1px;
-        transition: all 0.15s;
-    }
-
-    .net-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-    .net-tab:hover:not(.active) { color: var(--white); }
-
-    .net-panel { display: none; }
-    .net-panel.active { display: block; }
-
-    /* Pastebin */
-    .paste-item {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 16px;
-        margin-bottom: 10px;
-        transition: border-color 0.2s;
-    }
-
-    .paste-item:hover { border-color: var(--border-hi); }
-
-    .paste-item-header {
-        display: flex; align-items: center; gap: 8px;
-        margin-bottom: 10px; flex-wrap: wrap;
-    }
-
-    .paste-item-title {
-        font-size: 14px; font-weight: 700;
-        color: var(--white); flex: 1;
-        min-width: 100px;
-    }
-
-    .paste-preview {
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        overflow: hidden; max-height: 160px;
-        overflow-y: auto;
-    }
-
-    .paste-preview pre { margin: 0; }
-    .paste-preview pre code.hljs { font-size: 12px; padding: 12px; background: transparent; }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .db-wrap { grid-template-columns: 1fr; grid-template-rows: var(--hdr) 1fr; }
-        .db-logo  { width: auto; border-right: none; }
-        .db-sidebar {
-            position: fixed; left: -100%; top: var(--hdr); bottom: 0;
-            width: 232px; z-index: 100;
-            transition: left 0.28s ease;
-        }
-        .db-sidebar.open { left: 0; }
-        .hamburger-db { display: flex; }
-        .db-main { padding: 20px 16px; }
-        .db-grid-2, .db-grid-3 { grid-template-columns: 1fr; }
-        .net-tab { padding: 8px 12px; font-size: 12px; }
-    }
-    </style>
 </head>
 <body>
 
@@ -554,18 +19,26 @@
     <!-- ─ Header ─────────────────────────────────────────────── -->
     <header class="db-header">
         <div class="db-header-left">
-            <div class="db-logo">
-                <div class="db-logo-icon">HF</div>
-                Dashboard
-            </div>
-            <span class="db-header-title">
-                <span id="tool-name">Network Toolkit</span>
-            </span>
-        </div>
-        <div class="db-header-right">
-            <button class="hamburger-db" id="sb-toggle" aria-label="Menu">
+            <button class="hamburger-db" id="sb-toggle" aria-label="Toggle sidebar">
                 <span></span><span></span><span></span>
             </button>
+            <a href="/" class="db-logo">
+                <div class="db-logo-icon">HF</div>
+                Dashboard
+            </a>
+            <div class="db-breadcrumb">
+                <span class="db-breadcrumb-sep">/</span>
+                <span id="tool-name">Dashboard</span>
+            </div>
+        </div>
+        <div class="db-header-center">
+            <button id="cmd-palette-btn" class="cmd-palette-trigger" aria-label="Open command palette (⌘K)">
+                <i class="fas fa-search" style="font-size:11px;opacity:.55;flex-shrink:0"></i>
+                <span>Search tools…</span>
+                <kbd>⌘K</kbd>
+            </button>
+        </div>
+        <div class="db-header-right">
             <a href="/" class="hdr-btn" style="text-decoration:none">
                 <i class="fas fa-globe"></i> Site
             </a>
@@ -578,68 +51,79 @@
     <!-- ─ Sidebar ─────────────────────────────────────────────── -->
     <aside class="db-sidebar" id="db-sidebar">
 
-        <div class="sb-section">
-            <span class="sb-section-label">Network</span>
-            <button class="sb-btn active" data-tool="net">
-                <i class="fas fa-network-wired"></i> Network Toolkit
-            </button>
+        <div class="sb-search-wrap">
+            <i class="fas fa-search sb-search-icon"></i>
+            <input id="sb-search" class="sb-search" type="text" placeholder="Search tools…" autocomplete="off">
+        </div>
+
+        <button class="sb-btn sb-btn-home" data-tool="home">
+            <i class="fas fa-home"></i> Dashboard
+        </button>
+
+        <!-- Pinned (dynamic — populated by dashboard.js) -->
+        <div class="sb-section" id="sb-pinned" style="display:none">
+            <span class="sb-section-label">Pinned</span>
+            <div class="sb-group" id="sb-pinned-group"></div>
+        </div>
+
+        <!-- Recent (dynamic) -->
+        <div class="sb-section" id="sb-recent-section" style="display:none">
+            <span class="sb-section-label">Recent</span>
+            <div class="sb-group" id="sb-recent-group"></div>
         </div>
 
         <div class="sb-section">
-            <span class="sb-section-label">Developer</span>
-            <button class="sb-btn" data-tool="json">
-                <i class="fas fa-code"></i> JSON Formatter
+            <button class="sb-section-label sb-collapsible" data-section="network">
+                <span>Network</span>
+                <i class="fas fa-chevron-down sb-chevron"></i>
             </button>
-            <button class="sb-btn" data-tool="base64">
-                <i class="fas fa-exchange-alt"></i> Base64
-            </button>
-            <button class="sb-btn" data-tool="colour">
-                <i class="fas fa-palette"></i> Colour Picker
-            </button>
-            <button class="sb-btn" data-tool="regex">
-                <i class="fas fa-search"></i> Regex Tester
-            </button>
-            <button class="sb-btn" data-tool="timestamp">
-                <i class="fas fa-clock"></i> Timestamp
-            </button>
-            <button class="sb-btn" data-tool="paste">
-                <i class="fas fa-paste"></i> Pastebin
-            </button>
-            <button class="sb-btn" data-tool="httpreq">
-                <i class="fas fa-paper-plane"></i> HTTP Request
-            </button>
-            <button class="sb-btn" data-tool="jwt">
-                <i class="fas fa-shield-alt"></i> JWT Decoder
-            </button>
-            <button class="sb-btn" data-tool="urlenc">
-                <i class="fas fa-link"></i> URL Encoder
-            </button>
-            <button class="sb-btn" data-tool="uuid">
-                <i class="fas fa-fingerprint"></i> UUID Generator
-            </button>
-            <button class="sb-btn" data-tool="curl">
-                <i class="fas fa-terminal"></i> cURL → Fetch
-            </button>
+            <div class="sb-group" data-group="network">
+                <button class="sb-btn" data-tool="net">
+                    <i class="fas fa-network-wired"></i> Network Toolkit
+                </button>
+            </div>
         </div>
 
         <div class="sb-section">
-            <span class="sb-section-label">Aviation</span>
-            <button class="sb-btn" data-tool="metar">
-                <i class="fas fa-cloud-sun"></i> METAR / TAF
+            <button class="sb-section-label sb-collapsible" data-section="developer">
+                <span>Developer</span>
+                <i class="fas fa-chevron-down sb-chevron"></i>
             </button>
-            <button class="sb-btn" data-tool="flights">
-                <i class="fas fa-plane"></i> Flight Tracker
-            </button>
+            <div class="sb-group" data-group="developer">
+                <button class="sb-btn" data-tool="json"><i class="fas fa-code"></i> JSON Formatter</button>
+                <button class="sb-btn" data-tool="base64"><i class="fas fa-exchange-alt"></i> Base64</button>
+                <button class="sb-btn" data-tool="colour"><i class="fas fa-palette"></i> Colour Picker</button>
+                <button class="sb-btn" data-tool="regex"><i class="fas fa-search"></i> Regex Tester</button>
+                <button class="sb-btn" data-tool="timestamp"><i class="fas fa-clock"></i> Timestamp</button>
+                <button class="sb-btn" data-tool="paste"><i class="fas fa-paste"></i> Pastebin</button>
+                <button class="sb-btn" data-tool="httpreq"><i class="fas fa-paper-plane"></i> HTTP Request</button>
+                <button class="sb-btn" data-tool="jwt"><i class="fas fa-shield-alt"></i> JWT Decoder</button>
+                <button class="sb-btn" data-tool="urlenc"><i class="fas fa-link"></i> URL Encoder</button>
+                <button class="sb-btn" data-tool="uuid"><i class="fas fa-fingerprint"></i> UUID Generator</button>
+                <button class="sb-btn" data-tool="curl"><i class="fas fa-terminal"></i> cURL → Fetch</button>
+            </div>
         </div>
 
         <div class="sb-section">
-            <span class="sb-section-label">General</span>
-            <button class="sb-btn" data-tool="ip">
-                <i class="fas fa-map-marker-alt"></i> My IP
+            <button class="sb-section-label sb-collapsible" data-section="aviation">
+                <span>Aviation</span>
+                <i class="fas fa-chevron-down sb-chevron"></i>
             </button>
-            <button class="sb-btn" data-tool="password">
-                <i class="fas fa-key"></i> Password Gen
+            <div class="sb-group" data-group="aviation">
+                <button class="sb-btn" data-tool="metar"><i class="fas fa-cloud-sun"></i> METAR / TAF</button>
+                <button class="sb-btn" data-tool="flights"><i class="fas fa-plane"></i> Flight Tracker</button>
+            </div>
+        </div>
+
+        <div class="sb-section">
+            <button class="sb-section-label sb-collapsible" data-section="general">
+                <span>General</span>
+                <i class="fas fa-chevron-down sb-chevron"></i>
             </button>
+            <div class="sb-group" data-group="general">
+                <button class="sb-btn" data-tool="ip"><i class="fas fa-map-marker-alt"></i> My IP</button>
+                <button class="sb-btn" data-tool="password"><i class="fas fa-key"></i> Password Gen</button>
+            </div>
         </div>
 
     </aside>
@@ -647,23 +131,116 @@
     <!-- ─ Main content ────────────────────────────────────────── -->
     <main class="db-main">
 
+        <!-- ══ Home Dashboard ══ -->
+        <div class="tool-panel active" id="panel-home">
+            <div class="home-header">
+                <div>
+                    <h1 class="home-greeting" id="home-greeting">Welcome back.</h1>
+                    <p class="home-date" id="home-date"></p>
+                </div>
+                <div class="home-ip-widget">
+                    <span class="home-ip-label"><i class="fas fa-map-marker-alt" style="margin-right:5px;font-size:9px"></i>Your IP</span>
+                    <span class="home-ip-val" id="home-ip-val">loading…</span>
+                </div>
+            </div>
+
+            <div class="home-stats">
+                <div class="stat-card">
+                    <div class="stat-num">16</div>
+                    <div class="stat-label">Tools</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num">4</div>
+                    <div class="stat-label">Categories</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-recent">0</div>
+                    <div class="stat-label">Recent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-pinned">0</div>
+                    <div class="stat-label">Pinned</div>
+                </div>
+            </div>
+
+            <section class="home-section">
+                <div class="home-section-header">
+                    <h2 class="home-section-title">Pinned</h2>
+                    <span class="home-section-hint">Star any tool to pin it here</span>
+                </div>
+                <div class="tool-quick-grid" id="home-pinned-grid">
+                    <div class="quick-empty-state">No pinned tools yet — star a tool to pin it here.</div>
+                </div>
+            </section>
+
+            <section class="home-section">
+                <div class="home-section-header">
+                    <h2 class="home-section-title">Recently Used</h2>
+                </div>
+                <div class="tool-quick-grid" id="home-recent-grid">
+                    <div class="quick-empty-state">Open a tool to see it here.</div>
+                </div>
+            </section>
+
+            <section class="home-section">
+                <h2 class="home-section-title" style="margin-bottom:12px">Categories</h2>
+                <div class="category-grid">
+                    <div class="cat-card" onclick="navigateTo('net')">
+                        <div class="cat-card-icon"><i class="fas fa-network-wired"></i></div>
+                        <div class="cat-card-body">
+                            <div class="cat-name">Network</div>
+                            <div class="cat-desc">DNS, ping, SSL, traceroute, IP geo, headers</div>
+                        </div>
+                        <div class="cat-count">9 tools</div>
+                    </div>
+                    <div class="cat-card" onclick="navigateTo('json')">
+                        <div class="cat-card-icon"><i class="fas fa-code"></i></div>
+                        <div class="cat-card-body">
+                            <div class="cat-name">Developer</div>
+                            <div class="cat-desc">JSON, Base64, regex, JWT, UUID, cURL</div>
+                        </div>
+                        <div class="cat-count">11 tools</div>
+                    </div>
+                    <div class="cat-card" onclick="navigateTo('metar')">
+                        <div class="cat-card-icon"><i class="fas fa-plane"></i></div>
+                        <div class="cat-card-body">
+                            <div class="cat-name">Aviation</div>
+                            <div class="cat-desc">METAR / TAF weather, live flight tracker</div>
+                        </div>
+                        <div class="cat-count">2 tools</div>
+                    </div>
+                    <div class="cat-card" onclick="navigateTo('ip')">
+                        <div class="cat-card-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="cat-card-body">
+                            <div class="cat-name">General</div>
+                            <div class="cat-desc">My IP info, password generator</div>
+                        </div>
+                        <div class="cat-count">2 tools</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
         <!-- ══ Network Toolkit ══ -->
-        <div class="tool-panel active" id="panel-net">
+        <div class="tool-panel" id="panel-net">
             <div class="tool-header">
-                <h2>Network Toolkit</h2>
-                <p>Browser-based network diagnostics. Run DNS lookups, ping checks, port scans, and WHOIS queries — no terminal required.</p>
+                <div class="tool-header-content">
+                    <h2>Network Toolkit</h2>
+                    <p>Browser-based network diagnostics. Run DNS lookups, ping checks, port scans, and WHOIS queries — no terminal required.</p>
+                </div>
+                <button class="tool-star" data-tool="net" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
 
             <div class="net-tabs">
-                <button class="net-tab active" data-net="dns"><i class="fas fa-server" style="margin-right:6px;font-size:11px"></i>DNS Lookup</button>
-                <button class="net-tab" data-net="ping"><i class="fas fa-satellite-dish" style="margin-right:6px;font-size:11px"></i>Ping</button>
-                <button class="net-tab" data-net="port"><i class="fas fa-plug" style="margin-right:6px;font-size:11px"></i>Port Check</button>
-                <button class="net-tab" data-net="whois"><i class="fas fa-info-circle" style="margin-right:6px;font-size:11px"></i>WHOIS</button>
-                <button class="net-tab" data-net="traceroute"><i class="fas fa-route" style="margin-right:6px;font-size:11px"></i>Traceroute</button>
-                <button class="net-tab" data-net="geoip"><i class="fas fa-map-marker-alt" style="margin-right:6px;font-size:11px"></i>IP Geo</button>
-                <button class="net-tab" data-net="ssl"><i class="fas fa-shield-alt" style="margin-right:6px;font-size:11px"></i>SSL Cert</button>
-                <button class="net-tab" data-net="uptime"><i class="fas fa-heartbeat" style="margin-right:6px;font-size:11px"></i>Status</button>
-                <button class="net-tab" data-net="headers"><i class="fas fa-list-ul" style="margin-right:6px;font-size:11px"></i>Headers</button>
+                <button class="net-tab active" data-net="dns"><i class="fas fa-server" style="margin-right:5px;font-size:10px"></i>DNS Lookup</button>
+                <button class="net-tab" data-net="ping"><i class="fas fa-satellite-dish" style="margin-right:5px;font-size:10px"></i>Ping</button>
+                <button class="net-tab" data-net="port"><i class="fas fa-plug" style="margin-right:5px;font-size:10px"></i>Port Check</button>
+                <button class="net-tab" data-net="whois"><i class="fas fa-info-circle" style="margin-right:5px;font-size:10px"></i>WHOIS</button>
+                <button class="net-tab" data-net="traceroute"><i class="fas fa-route" style="margin-right:5px;font-size:10px"></i>Traceroute</button>
+                <button class="net-tab" data-net="geoip"><i class="fas fa-map-marker-alt" style="margin-right:5px;font-size:10px"></i>IP Geo</button>
+                <button class="net-tab" data-net="ssl"><i class="fas fa-shield-alt" style="margin-right:5px;font-size:10px"></i>SSL Cert</button>
+                <button class="net-tab" data-net="uptime"><i class="fas fa-heartbeat" style="margin-right:5px;font-size:10px"></i>Status</button>
+                <button class="net-tab" data-net="headers"><i class="fas fa-list-ul" style="margin-right:5px;font-size:10px"></i>Headers</button>
             </div>
 
             <!-- DNS Lookup -->
@@ -689,7 +266,7 @@
                         <button class="db-btn" onclick="dnsLookup()"><i class="fas fa-search"></i> Lookup</button>
                     </div>
                 </div>
-                <div id="dns-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="dns-error" style="font-size:13px; color:var(--red); margin-top:10px; display:none"></div>
                 <div id="dns-result" style="display:none">
                     <div class="db-card">
                         <h4 id="dns-result-title">Results</h4>
@@ -710,11 +287,11 @@
                         <button class="db-btn" onclick="doPing()"><i class="fas fa-satellite-dish"></i> Ping</button>
                     </div>
                 </div>
-                <div id="ping-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="ping-error" style="font-size:13px; color:var(--red); margin-top:10px; display:none"></div>
                 <div class="db-card" id="ping-result" style="margin-top:14px; display:none">
                     <div id="ping-result-body"></div>
                 </div>
-                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Browser ping measures HTTP round-trip time, not raw ICMP. Results reflect HTTP reachability and latency.</p>
+                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Browser ping measures HTTP round-trip time, not raw ICMP.</p>
             </div>
 
             <!-- Port Check -->
@@ -726,27 +303,27 @@
                     </div>
                     <div class="db-field" style="width:110px">
                         <label class="db-label">Port</label>
-                        <input class="db-input" type="number" id="port-port" placeholder="80" min="1" max="65535" style="font-family:'SF Mono',monospace">
+                        <input class="db-input" type="number" id="port-port" placeholder="80" min="1" max="65535" style="font-family:var(--font-mono)">
                     </div>
                     <div style="margin-bottom:0">
                         <button class="db-btn" onclick="checkPort()"><i class="fas fa-plug"></i> Check</button>
                     </div>
                 </div>
-                <div id="port-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="port-error" style="font-size:13px; color:var(--red); margin-top:10px; display:none"></div>
                 <div class="db-card" id="port-result" style="margin-top:14px; display:none">
                     <div id="port-result-body"></div>
                 </div>
                 <div class="db-card" style="margin-top:14px">
                     <h4>Common ports</h4>
                     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:4px">
-                        <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setPort(80)">80 HTTP</button>
-                        <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setPort(443)">443 HTTPS</button>
-                        <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setPort(22)">22 SSH</button>
-                        <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setPort(21)">21 FTP</button>
-                        <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setPort(3306)">3306 MySQL</button>
-                        <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setPort(5432)">5432 Postgres</button>
-                        <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setPort(6379)">6379 Redis</button>
-                        <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setPort(8080)">8080 Alt-HTTP</button>
+                        <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setPort(80)">80 HTTP</button>
+                        <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setPort(443)">443 HTTPS</button>
+                        <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setPort(22)">22 SSH</button>
+                        <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setPort(21)">21 FTP</button>
+                        <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setPort(3306)">3306 MySQL</button>
+                        <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setPort(5432)">5432 Postgres</button>
+                        <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setPort(6379)">6379 Redis</button>
+                        <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setPort(8080)">8080 Alt-HTTP</button>
                     </div>
                 </div>
                 <p style="font-size:12px; color:var(--gray-dim); margin-top:4px"><i class="fas fa-info-circle"></i> Port check via HackerTarget API. Rate limit: ~1 request/minute on the free tier.</p>
@@ -763,12 +340,12 @@
                         <button class="db-btn" onclick="doWhois()"><i class="fas fa-info-circle"></i> Lookup</button>
                     </div>
                 </div>
-                <div id="whois-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="whois-error" style="font-size:13px; color:var(--red); margin-top:10px; display:none"></div>
                 <div class="db-card" id="whois-result" style="margin-top:14px; display:none">
                     <h4 id="whois-result-title">WHOIS</h4>
                     <div id="whois-result-body"></div>
                 </div>
-                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Queries via RDAP protocol. TLDs with no RDAP support may not return results.</p>
+                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Queries via RDAP protocol.</p>
             </div>
 
             <!-- Traceroute -->
@@ -782,7 +359,7 @@
                         <button class="db-btn" onclick="doTraceroute()"><i class="fas fa-route"></i> Trace</button>
                     </div>
                 </div>
-                <div id="traceroute-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="traceroute-error" style="font-size:13px; color:var(--red); margin-top:10px; display:none"></div>
                 <div class="db-card" id="traceroute-result" style="margin-top:14px; display:none">
                     <h4 id="traceroute-result-title">Hops</h4>
                     <div id="traceroute-result-body"></div>
@@ -801,14 +378,14 @@
                         <button class="db-btn" onclick="doGeoIP()"><i class="fas fa-map-marker-alt"></i> Locate</button>
                     </div>
                 </div>
-                <div id="geoip-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="geoip-error" style="font-size:13px; color:var(--red); margin-top:10px; display:none"></div>
                 <div id="geoip-result" style="display:none">
                     <div id="geoip-map"></div>
                     <div class="db-card" style="margin-top:12px">
                         <div id="geoip-result-body"></div>
                     </div>
                 </div>
-                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Geolocation via ipapi.co. Map shows approximate location — accuracy varies by ISP.</p>
+                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Geolocation via ipapi.co. Accuracy varies by ISP.</p>
             </div>
 
             <!-- SSL Certificate Checker -->
@@ -822,7 +399,7 @@
                         <button class="db-btn" onclick="checkSSL()"><i class="fas fa-shield-alt"></i> Check</button>
                     </div>
                 </div>
-                <div id="ssl-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="ssl-error" style="font-size:13px; color:var(--red); margin-top:10px; display:none"></div>
                 <div id="ssl-result" style="display:none">
                     <div class="db-grid-3" style="margin-top:14px">
                         <div class="db-card" style="text-align:center">
@@ -843,7 +420,7 @@
                         <div id="ssl-details-body"></div>
                     </div>
                 </div>
-                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Powered by SSL Labs API. Uses cached results (≤24h). First-time scans may take 30–60s.</p>
+                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Powered by SSL Labs API. First-time scans may take 30–60s.</p>
             </div>
 
             <!-- Website Status Monitor -->
@@ -857,11 +434,11 @@
                         <button class="db-btn" onclick="checkUptime()"><i class="fas fa-heartbeat"></i> Check</button>
                     </div>
                 </div>
-                <div id="uptime-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="uptime-error" style="font-size:13px; color:var(--red); margin-top:10px; display:none"></div>
                 <div class="db-card" id="uptime-result" style="margin-top:14px; display:none">
                     <div id="uptime-result-body"></div>
                 </div>
-                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Combines a browser-side reachability check with a server-side header fetch for dual verification.</p>
+                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Combines browser-side reachability with a server-side header fetch.</p>
             </div>
 
             <!-- Headers Inspector -->
@@ -875,22 +452,25 @@
                         <button class="db-btn" onclick="inspectHeaders()"><i class="fas fa-list-ul"></i> Inspect</button>
                     </div>
                 </div>
-                <div id="headers-error" style="font-size:13px; color:#ff453a; margin-top:10px; display:none"></div>
+                <div id="headers-error" style="font-size:13px; color:var(--red); margin-top:10px; display:none"></div>
                 <div id="headers-result" style="display:none">
                     <div class="db-card" style="margin-top:14px">
                         <div id="headers-summary"></div>
                     </div>
                     <div id="headers-result-body"></div>
                 </div>
-                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Fetches response headers via HackerTarget. Headers are grouped by category for readability.</p>
+                <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> Fetches response headers via HackerTarget. Headers are grouped by category.</p>
             </div>
         </div>
 
         <!-- ══ JSON Formatter ══ -->
         <div class="tool-panel" id="panel-json">
             <div class="tool-header">
-                <h2>JSON Formatter</h2>
-                <p>Paste raw or minified JSON to format, validate, or minify it.</p>
+                <div class="tool-header-content">
+                    <h2>JSON Formatter</h2>
+                    <p>Paste raw or minified JSON to format, validate, or minify it.</p>
+                </div>
+                <button class="tool-star" data-tool="json" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-field">
                 <label class="db-label">Input</label>
@@ -912,8 +492,11 @@
         <!-- ══ Base64 ══ -->
         <div class="tool-panel" id="panel-base64">
             <div class="tool-header">
-                <h2>Base64</h2>
-                <p>Encode text to Base64 or decode Base64 back to text.</p>
+                <div class="tool-header-content">
+                    <h2>Base64</h2>
+                    <p>Encode text to Base64 or decode Base64 back to text.</p>
+                </div>
+                <button class="tool-star" data-tool="base64" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-field">
                 <label class="db-label">Input</label>
@@ -934,14 +517,17 @@
         <!-- ══ Colour Picker ══ -->
         <div class="tool-panel" id="panel-colour">
             <div class="tool-header">
-                <h2>Colour Picker</h2>
-                <p>Pick a colour and get HEX, RGB, and HSL values for CSS.</p>
+                <div class="tool-header-content">
+                    <h2>Colour Picker</h2>
+                    <p>Pick a colour and get HEX, RGB, and HSL values for CSS.</p>
+                </div>
+                <button class="tool-star" data-tool="colour" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="colour-input-wrap">
                 <input type="color" id="colour-picker-input" value="#2997ff">
                 <div style="flex:1">
                     <label class="db-label" style="margin-bottom:4px">Hex value</label>
-                    <input class="db-input" type="text" id="colour-hex-input" value="#2997ff" placeholder="#rrggbb" style="font-family:'SF Mono',monospace">
+                    <input class="db-input" type="text" id="colour-hex-input" value="#2997ff" placeholder="#rrggbb" style="font-family:var(--font-mono)">
                 </div>
                 <button class="db-btn" onclick="applyHexInput()" style="margin-top:18px">Apply</button>
             </div>
@@ -974,17 +560,20 @@ background-color: #2997ff;</div>
         <!-- ══ Regex Tester ══ -->
         <div class="tool-panel" id="panel-regex">
             <div class="tool-header">
-                <h2>Regex Tester</h2>
-                <p>Test regular expression patterns against a string and see matches highlighted.</p>
+                <div class="tool-header-content">
+                    <h2>Regex Tester</h2>
+                    <p>Test regular expression patterns against a string and see matches highlighted.</p>
+                </div>
+                <button class="tool-star" data-tool="regex" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-row" style="align-items:flex-end">
                 <div class="db-field" style="flex:1">
                     <label class="db-label">Pattern</label>
-                    <input class="db-input" type="text" id="regex-pattern" placeholder="e.g. \b\w{5}\b" style="font-family:'SF Mono',monospace">
+                    <input class="db-input" type="text" id="regex-pattern" placeholder="e.g. \b\w{5}\b" style="font-family:var(--font-mono)">
                 </div>
                 <div class="db-field" style="width:120px">
                     <label class="db-label">Flags</label>
-                    <input class="db-input" type="text" id="regex-flags" value="gi" maxlength="6" style="font-family:'SF Mono',monospace">
+                    <input class="db-input" type="text" id="regex-flags" value="gi" maxlength="6" style="font-family:var(--font-mono)">
                 </div>
                 <div style="margin-bottom:0">
                     <button class="db-btn" onclick="runRegex()"><i class="fas fa-play"></i> Test</button>
@@ -1001,44 +590,32 @@ background-color: #2997ff;</div>
                 </div>
                 <div id="regex-output" style="font-size:14px; line-height:1.9; color:var(--gray); word-break:break-word; min-height:40px"></div>
             </div>
-            <div id="regex-error" style="font-size:13px; color:#ff453a; margin-top:6px;"></div>
+            <div id="regex-error" style="font-size:13px; color:var(--red); margin-top:6px;"></div>
         </div>
 
         <!-- ══ Timestamp ══ -->
         <div class="tool-panel" id="panel-timestamp">
             <div class="tool-header">
-                <h2>Unix Timestamp</h2>
-                <p>Convert between Unix timestamps and human-readable dates.</p>
+                <div class="tool-header-content">
+                    <h2>Unix Timestamp</h2>
+                    <p>Convert between Unix timestamps and human-readable dates.</p>
+                </div>
+                <button class="tool-star" data-tool="timestamp" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-card">
                 <h4>Current time</h4>
-                <div class="db-info-row">
-                    <span class="lbl">Unix (seconds)</span>
-                    <span class="val" id="ts-now-s">—</span>
-                </div>
-                <div class="db-info-row">
-                    <span class="lbl">Unix (ms)</span>
-                    <span class="val" id="ts-now-ms">—</span>
-                </div>
-                <div class="db-info-row">
-                    <span class="lbl">UTC</span>
-                    <span class="val" id="ts-utc">—</span>
-                </div>
-                <div class="db-info-row">
-                    <span class="lbl">Local</span>
-                    <span class="val" id="ts-local">—</span>
-                </div>
-                <div class="db-info-row">
-                    <span class="lbl">ISO 8601</span>
-                    <span class="val" id="ts-iso">—</span>
-                </div>
+                <div class="db-info-row"><span class="lbl">Unix (seconds)</span><span class="val" id="ts-now-s">—</span></div>
+                <div class="db-info-row"><span class="lbl">Unix (ms)</span><span class="val" id="ts-now-ms">—</span></div>
+                <div class="db-info-row"><span class="lbl">UTC</span><span class="val" id="ts-utc">—</span></div>
+                <div class="db-info-row"><span class="lbl">Local</span><span class="val" id="ts-local">—</span></div>
+                <div class="db-info-row"><span class="lbl">ISO 8601</span><span class="val" id="ts-iso">—</span></div>
             </div>
             <div class="db-grid-2">
                 <div class="db-card">
                     <h4>Unix &rarr; Date</h4>
                     <div class="db-field">
                         <label class="db-label">Unix timestamp</label>
-                        <input class="db-input" type="number" id="ts-unix-in" placeholder="e.g. 1700000000" style="font-family:'SF Mono',monospace">
+                        <input class="db-input" type="number" id="ts-unix-in" placeholder="e.g. 1700000000" style="font-family:var(--font-mono)">
                     </div>
                     <button class="db-btn" onclick="convertUnixToDate()" style="width:100%">Convert</button>
                     <div class="db-output" id="ts-unix-out" style="margin-top:10px; min-height:0; font-size:12px">—</div>
@@ -1047,7 +624,7 @@ background-color: #2997ff;</div>
                     <h4>Date &rarr; Unix</h4>
                     <div class="db-field">
                         <label class="db-label">Date &amp; time</label>
-                        <input class="db-input" type="datetime-local" id="ts-date-in" style="font-family:'SF Mono',monospace">
+                        <input class="db-input" type="datetime-local" id="ts-date-in" style="font-family:var(--font-mono)">
                     </div>
                     <button class="db-btn" onclick="convertDateToUnix()" style="width:100%">Convert</button>
                     <div class="db-output" id="ts-date-out" style="margin-top:10px; min-height:0; font-size:12px">—</div>
@@ -1058,10 +635,12 @@ background-color: #2997ff;</div>
         <!-- ══ Pastebin ══ -->
         <div class="tool-panel" id="panel-paste">
             <div class="tool-header">
-                <h2>Pastebin</h2>
-                <p>Private self-hosted code sharing with syntax highlighting. Snippets are stored locally in your browser — no third-party services.</p>
+                <div class="tool-header-content">
+                    <h2>Pastebin</h2>
+                    <p>Private self-hosted code sharing with syntax highlighting. Snippets stored locally — no third-party services.</p>
+                </div>
+                <button class="tool-star" data-tool="paste" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
-
             <div class="db-card">
                 <div class="db-row" style="margin-bottom:10px">
                     <div class="db-field" style="flex:2">
@@ -1101,21 +680,23 @@ background-color: #2997ff;</div>
                     <button class="db-btn-ghost" onclick="clearPaste()"><i class="fas fa-times"></i> Clear</button>
                 </div>
             </div>
-
             <div id="paste-list"></div>
         </div>
 
         <!-- ══ METAR / TAF ══ -->
         <div class="tool-panel" id="panel-metar">
             <div class="tool-header">
-                <h2>METAR / TAF</h2>
-                <p>Live aviation weather via the Aviation Weather Center API. Enter any ICAO airport code.</p>
+                <div class="tool-header-content">
+                    <h2>METAR / TAF</h2>
+                    <p>Live aviation weather via the Aviation Weather Center API. Enter any ICAO airport code.</p>
+                </div>
+                <button class="tool-star" data-tool="metar" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-row">
                 <div class="db-field" style="max-width:160px">
                     <label class="db-label">ICAO Code</label>
                     <input class="db-input" type="text" id="metar-icao" placeholder="YBBN" maxlength="4"
-                           style="text-transform:uppercase; font-family:'SF Mono',monospace; font-size:16px; font-weight:700; letter-spacing:0.08em"
+                           style="text-transform:uppercase; font-family:var(--font-mono); font-size:16px; font-weight:700; letter-spacing:0.08em"
                            oninput="this.value=this.value.toUpperCase()">
                 </div>
                 <div class="db-field" style="width:130px">
@@ -1129,9 +710,7 @@ background-color: #2997ff;</div>
                     <button class="db-btn" onclick="fetchWeather()"><i class="fas fa-download"></i> Fetch</button>
                 </div>
             </div>
-
-            <div id="metar-error" style="font-size:13px; color:#ff453a; margin-bottom:10px; display:none"></div>
-
+            <div id="metar-error" style="font-size:13px; color:var(--red); margin-bottom:10px; display:none"></div>
             <div id="metar-result" style="display:none">
                 <div class="metar-raw" id="metar-raw-out"></div>
                 <div class="db-card">
@@ -1139,16 +718,15 @@ background-color: #2997ff;</div>
                     <div id="metar-decoded"></div>
                 </div>
             </div>
-
             <div class="db-card" style="margin-top:14px">
                 <h4>Common Australian airports</h4>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:4px">
-                    <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setICAO('YBBN')">YBBN Brisbane</button>
-                    <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setICAO('YSSY')">YSSY Sydney</button>
-                    <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setICAO('YMML')">YMML Melbourne</button>
-                    <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setICAO('YBCS')">YBCS Cairns</button>
-                    <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setICAO('YPPH')">YPPH Perth</button>
-                    <button class="db-btn-ghost" style="font-size:12px; font-family:'SF Mono',monospace" onclick="setICAO('YPAD')">YPAD Adelaide</button>
+                    <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setICAO('YBBN')">YBBN Brisbane</button>
+                    <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setICAO('YSSY')">YSSY Sydney</button>
+                    <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setICAO('YMML')">YMML Melbourne</button>
+                    <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setICAO('YBCS')">YBCS Cairns</button>
+                    <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setICAO('YPPH')">YPPH Perth</button>
+                    <button class="db-btn-ghost" style="font-size:12px; font-family:var(--font-mono)" onclick="setICAO('YPAD')">YPAD Adelaide</button>
                 </div>
             </div>
         </div>
@@ -1156,8 +734,11 @@ background-color: #2997ff;</div>
         <!-- ══ Flight Tracker ══ -->
         <div class="tool-panel" id="panel-flights">
             <div class="tool-header">
-                <h2>Flight Tracker</h2>
-                <p>Quick access to live flight tracking services and aviation resources.</p>
+                <div class="tool-header-content">
+                    <h2>Flight Tracker</h2>
+                    <p>Quick access to live flight tracking services and aviation resources.</p>
+                </div>
+                <button class="tool-star" data-tool="flights" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-grid-2">
                 <div class="tunnel-card">
@@ -1174,7 +755,7 @@ background-color: #2997ff;</div>
                     <div class="tunnel-card-icon"><i class="fas fa-satellite"></i></div>
                     <div>
                         <h4>FlightAware</h4>
-                        <p>Detailed flight history, alerts, and ATC audio for US & international flights.</p>
+                        <p>Detailed flight history, alerts, and ATC audio for US &amp; international flights.</p>
                         <a href="https://www.flightaware.com/" target="_blank" rel="noopener" class="db-btn" style="font-size:12px">
                             <i class="fas fa-external-link-alt"></i> Open FlightAware
                         </a>
@@ -1221,15 +802,10 @@ background-color: #2997ff;</div>
                     </div>
                 </div>
             </div>
-
-            <!-- FR24 Embed -->
             <div class="db-card" style="padding:0; overflow:hidden; margin-top:4px">
-                <iframe
-                    src="https://www.flightradar24.com/simple"
+                <iframe src="https://www.flightradar24.com/simple"
                     style="width:100%; height:500px; border:none; display:block"
-                    loading="lazy"
-                    title="Flightradar24 Live"
-                    allow="geolocation">
+                    loading="lazy" title="Flightradar24 Live" allow="geolocation">
                 </iframe>
             </div>
         </div>
@@ -1237,8 +813,11 @@ background-color: #2997ff;</div>
         <!-- ══ My IP ══ -->
         <div class="tool-panel" id="panel-ip">
             <div class="tool-header">
-                <h2>My IP</h2>
-                <p>Your current IP address and network information.</p>
+                <div class="tool-header-content">
+                    <h2>My IP</h2>
+                    <p>Your current IP address and network information.</p>
+                </div>
+                <button class="tool-star" data-tool="ip" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-card" id="ip-card">
                 <div style="text-align:center; padding:20px; color:var(--gray)">
@@ -1254,19 +833,19 @@ background-color: #2997ff;</div>
         <!-- ══ Password Generator ══ -->
         <div class="tool-panel" id="panel-password">
             <div class="tool-header">
-                <h2>Password Generator</h2>
-                <p>Generate strong, random passwords with custom options.</p>
+                <div class="tool-header-content">
+                    <h2>Password Generator</h2>
+                    <p>Generate strong, random passwords with custom options.</p>
+                </div>
+                <button class="tool-star" data-tool="password" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
-
             <div class="pass-display" id="pass-display">
                 <span id="pass-value" style="flex:1">Click generate to create a password</span>
             </div>
-
             <div class="db-btn-row" style="margin-bottom:20px">
                 <button class="db-btn" onclick="generatePassword()"><i class="fas fa-sync-alt"></i> Generate</button>
                 <button class="db-btn-ghost" onclick="copyPassword()"><i class="fas fa-copy"></i> Copy</button>
             </div>
-
             <div class="db-card">
                 <h4>Options</h4>
                 <div class="db-field">
@@ -1277,20 +856,11 @@ background-color: #2997ff;</div>
                     <input type="range" id="pass-length" min="8" max="64" value="24"
                            oninput="document.getElementById('pass-len-label').textContent=this.value">
                 </div>
-                <label class="check-row">
-                    <input type="checkbox" id="pass-upper" checked> Uppercase (A–Z)
-                </label>
-                <label class="check-row">
-                    <input type="checkbox" id="pass-lower" checked> Lowercase (a–z)
-                </label>
-                <label class="check-row">
-                    <input type="checkbox" id="pass-digits" checked> Numbers (0–9)
-                </label>
-                <label class="check-row">
-                    <input type="checkbox" id="pass-symbols" checked> Symbols (!@#$%^&*)
-                </label>
+                <label class="check-row"><input type="checkbox" id="pass-upper" checked> Uppercase (A–Z)</label>
+                <label class="check-row"><input type="checkbox" id="pass-lower" checked> Lowercase (a–z)</label>
+                <label class="check-row"><input type="checkbox" id="pass-digits" checked> Numbers (0–9)</label>
+                <label class="check-row"><input type="checkbox" id="pass-symbols" checked> Symbols (!@#$%^&amp;*)</label>
             </div>
-
             <div class="db-card" style="margin-top:0">
                 <h4>Password strength</h4>
                 <div id="pass-strength-bar" style="height:4px; border-radius:2px; background:var(--gray-dim); margin-bottom:8px">
@@ -1303,8 +873,11 @@ background-color: #2997ff;</div>
         <!-- ══ HTTP Request Builder ══ -->
         <div class="tool-panel" id="panel-httpreq">
             <div class="tool-header">
-                <h2>HTTP Request Builder</h2>
-                <p>Send GET/POST requests and inspect JSON responses — no curl required.</p>
+                <div class="tool-header-content">
+                    <h2>HTTP Request Builder</h2>
+                    <p>Send GET/POST requests and inspect JSON responses — no curl required.</p>
+                </div>
+                <button class="tool-star" data-tool="httpreq" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-row" style="align-items:flex-end">
                 <div class="db-field" style="width:130px">
@@ -1319,7 +892,7 @@ background-color: #2997ff;</div>
                 </div>
                 <div class="db-field" style="flex:1">
                     <label class="db-label">URL</label>
-                    <input class="db-input" type="url" id="http-url" placeholder="https://api.example.com/endpoint" style="font-family:'SF Mono',monospace">
+                    <input class="db-input" type="url" id="http-url" placeholder="https://api.example.com/endpoint" style="font-family:var(--font-mono)">
                 </div>
                 <div style="margin-bottom:0">
                     <button class="db-btn" onclick="sendHttpRequest()"><i class="fas fa-paper-plane"></i> Send</button>
@@ -1335,7 +908,7 @@ background-color: #2997ff;</div>
                     <textarea class="db-textarea" id="http-body" style="min-height:100px" placeholder='{"key": "value"}'></textarea>
                 </div>
             </div>
-            <div id="http-error" style="font-size:13px; color:#ff453a; margin-top:8px; display:none"></div>
+            <div id="http-error" style="font-size:13px; color:var(--red); margin-top:8px; display:none"></div>
             <div id="http-result" style="display:none">
                 <div class="db-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
@@ -1355,14 +928,17 @@ background-color: #2997ff;</div>
                     </div>
                 </div>
             </div>
-            <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> CORS restrictions may block cross-origin requests. Use a public API or one with CORS headers enabled.</p>
+            <p style="font-size:12px; color:var(--gray-dim); margin-top:8px"><i class="fas fa-info-circle"></i> CORS restrictions may block cross-origin requests.</p>
         </div>
 
         <!-- ══ JWT Decoder ══ -->
         <div class="tool-panel" id="panel-jwt">
             <div class="tool-header">
-                <h2>JWT Decoder</h2>
-                <p>Paste a JSON Web Token to decode its header, payload, and signature.</p>
+                <div class="tool-header-content">
+                    <h2>JWT Decoder</h2>
+                    <p>Paste a JSON Web Token to decode its header, payload, and signature.</p>
+                </div>
+                <button class="tool-star" data-tool="jwt" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-field">
                 <label class="db-label">JWT Token</label>
@@ -1372,7 +948,7 @@ background-color: #2997ff;</div>
                 <button class="db-btn" onclick="decodeJWT()"><i class="fas fa-unlock-alt"></i> Decode</button>
                 <button class="db-btn-ghost" onclick="document.getElementById('jwt-input').value='';document.getElementById('jwt-result').style.display='none';document.getElementById('jwt-error').textContent=''"><i class="fas fa-times"></i> Clear</button>
             </div>
-            <div id="jwt-error" style="font-size:13px; color:#ff453a; margin-top:8px;"></div>
+            <div id="jwt-error" style="font-size:13px; color:var(--red); margin-top:8px;"></div>
             <div id="jwt-result" style="display:none; margin-top:14px">
                 <div class="db-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
@@ -1400,8 +976,11 @@ background-color: #2997ff;</div>
         <!-- ══ URL Encoder / Decoder ══ -->
         <div class="tool-panel" id="panel-urlenc">
             <div class="tool-header">
-                <h2>URL Encoder / Decoder</h2>
-                <p>Encode or decode URL components using <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:12px">encodeURIComponent</code> / <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:12px">decodeURIComponent</code>.</p>
+                <div class="tool-header-content">
+                    <h2>URL Encoder / Decoder</h2>
+                    <p>Encode or decode URL components using <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:12px">encodeURIComponent</code> / <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:12px">decodeURIComponent</code>.</p>
+                </div>
+                <button class="tool-star" data-tool="urlenc" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-field">
                 <label class="db-label">Input</label>
@@ -1423,13 +1002,16 @@ background-color: #2997ff;</div>
         <!-- ══ UUID Generator ══ -->
         <div class="tool-panel" id="panel-uuid">
             <div class="tool-header">
-                <h2>UUID Generator</h2>
-                <p>Generate cryptographically random UUIDs (v4).</p>
+                <div class="tool-header-content">
+                    <h2>UUID Generator</h2>
+                    <p>Generate cryptographically random UUIDs (v4).</p>
+                </div>
+                <button class="tool-star" data-tool="uuid" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-row" style="align-items:flex-end; margin-bottom:14px">
                 <div class="db-field" style="width:140px; margin-bottom:0">
                     <label class="db-label">Count</label>
-                    <input class="db-input" type="number" id="uuid-count" value="5" min="1" max="50" style="font-family:'SF Mono',monospace">
+                    <input class="db-input" type="number" id="uuid-count" value="5" min="1" max="50" style="font-family:var(--font-mono)">
                 </div>
                 <div style="margin-bottom:0">
                     <button class="db-btn" onclick="generateUUIDs()"><i class="fas fa-sync-alt"></i> Generate</button>
@@ -1447,8 +1029,11 @@ background-color: #2997ff;</div>
         <!-- ══ cURL → Fetch ══ -->
         <div class="tool-panel" id="panel-curl">
             <div class="tool-header">
-                <h2>cURL → Fetch</h2>
-                <p>Convert a cURL command into a JavaScript <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:13px">fetch()</code> call.</p>
+                <div class="tool-header-content">
+                    <h2>cURL → Fetch</h2>
+                    <p>Convert a cURL command into a JavaScript <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:13px">fetch()</code> call.</p>
+                </div>
+                <button class="tool-star" data-tool="curl" title="Pin to sidebar"><span class="star-icon">☆</span></button>
             </div>
             <div class="db-field">
                 <label class="db-label">cURL command</label>
@@ -1459,7 +1044,7 @@ background-color: #2997ff;</div>
                 <button class="db-btn-ghost" onclick="copyCurlOutput()"><i class="fas fa-copy"></i> Copy output</button>
                 <button class="db-btn-ghost" onclick="document.getElementById('curl-input').value='';document.getElementById('curl-output').value='';document.getElementById('curl-error').textContent=''"><i class="fas fa-times"></i> Clear</button>
             </div>
-            <div id="curl-error" style="font-size:13px; color:#ff453a; margin-top:8px;"></div>
+            <div id="curl-error" style="font-size:13px; color:var(--red); margin-top:8px;"></div>
             <div class="db-field" style="margin-top:14px">
                 <label class="db-label">fetch() output</label>
                 <textarea class="db-textarea" id="curl-output" style="min-height:260px; font-size:13px" readonly placeholder="JavaScript fetch() call will appear here..."></textarea>
@@ -1469,1298 +1054,18 @@ background-color: #2997ff;</div>
     </main>
 </div>
 
-<script>
-(function() {
-    // Auth guard
-    if (sessionStorage.getItem('hf_auth') !== '1') {
-        location.replace('login.html');
-    }
-
-    // Logout
-    document.getElementById('logout-btn').addEventListener('click', function() {
-        sessionStorage.removeItem('hf_auth');
-        location.replace('login.html');
-    });
-
-    // Sidebar toggle (mobile)
-    var sbToggle = document.getElementById('sb-toggle');
-    var sidebar  = document.getElementById('db-sidebar');
-    sbToggle.addEventListener('click', function() {
-        sidebar.classList.toggle('open');
-    });
-
-    // Tool switching
-    var panels  = document.querySelectorAll('.tool-panel');
-    var sbBtns  = document.querySelectorAll('.sb-btn');
-    var toolNames = {
-        net:'Network Toolkit', json:'JSON Formatter',
-        base64:'Base64', colour:'Colour Picker', regex:'Regex Tester',
-        timestamp:'Timestamp', paste:'Pastebin', metar:'METAR / TAF',
-        flights:'Flight Tracker', ip:'My IP', password:'Password Gen',
-        httpreq:'HTTP Request Builder', jwt:'JWT Decoder',
-        urlenc:'URL Encoder / Decoder', uuid:'UUID Generator', curl:'cURL → Fetch'
-    };
-
-    sbBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var tool = this.dataset.tool;
-            sbBtns.forEach(function(b) { b.classList.remove('active'); });
-            this.classList.add('active');
-            panels.forEach(function(p) { p.classList.remove('active'); });
-            var panel = document.getElementById('panel-' + tool);
-            if (panel) panel.classList.add('active');
-            document.getElementById('tool-name').textContent = toolNames[tool] || tool;
-            sidebar.classList.remove('open');
-            // Lazy init
-            if (tool === 'ip')        loadIPInfo();
-            if (tool === 'timestamp') startClock();
-            if (tool === 'colour')    updateColour('#2997ff');
-            if (tool === 'paste')     renderPasteList();
-        });
-    });
-
-    // ── Network Toolkit ───────────────────────────────────────
-    // Sub-tab switching
-    document.querySelectorAll('.net-tab').forEach(function(tab) {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('.net-tab').forEach(function(t) { t.classList.remove('active'); });
-            document.querySelectorAll('.net-panel').forEach(function(p) { p.classList.remove('active'); });
-            this.classList.add('active');
-            var panel = document.getElementById('net-' + this.dataset.net);
-            if (panel) panel.classList.add('active');
-            // Invalidate Leaflet map size when geoip tab becomes visible
-            if (this.dataset.net === 'geoip' && _geoMap) { setTimeout(function() { _geoMap.invalidateSize(); }, 50); }
-        });
-    });
-
-    // Enter key shortcuts
-    document.getElementById('dns-domain').addEventListener('keydown', function(e) { if (e.key==='Enter') dnsLookup(); });
-    document.getElementById('ping-host').addEventListener('keydown', function(e) { if (e.key==='Enter') doPing(); });
-    document.getElementById('port-host').addEventListener('keydown', function(e) { if (e.key==='Enter') checkPort(); });
-    document.getElementById('port-port').addEventListener('keydown', function(e) { if (e.key==='Enter') checkPort(); });
-    document.getElementById('whois-query').addEventListener('keydown', function(e) { if (e.key==='Enter') doWhois(); });
-    document.getElementById('traceroute-host').addEventListener('keydown', function(e) { if (e.key==='Enter') doTraceroute(); });
-    document.getElementById('geoip-query').addEventListener('keydown', function(e) { if (e.key==='Enter') doGeoIP(); });
-    document.getElementById('ssl-domain').addEventListener('keydown', function(e) { if (e.key==='Enter') checkSSL(); });
-    document.getElementById('uptime-url').addEventListener('keydown', function(e) { if (e.key==='Enter') checkUptime(); });
-    document.getElementById('headers-url').addEventListener('keydown', function(e) { if (e.key==='Enter') inspectHeaders(); });
-
-    // DNS Lookup via Cloudflare DoH
-    window.dnsLookup = function() {
-        var domain  = document.getElementById('dns-domain').value.trim();
-        var type    = document.getElementById('dns-type').value;
-        var result  = document.getElementById('dns-result');
-        var errEl   = document.getElementById('dns-error');
-        result.style.display = 'none';
-        errEl.style.display  = 'none';
-        if (!domain) { errEl.textContent = 'Enter a domain name.'; errEl.style.display = 'block'; return; }
-
-        fetch('https://cloudflare-dns.com/dns-query?name=' + encodeURIComponent(domain) + '&type=' + type, {
-            headers: { 'Accept': 'application/dns-json' }
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            document.getElementById('dns-result-title').textContent = type + ' records for ' + domain;
-            var body = document.getElementById('dns-result-body');
-            if (!data.Answer || !data.Answer.length) {
-                body.innerHTML = '<p style="color:var(--gray);font-size:14px;padding:8px 0">No ' + type + ' records found for this domain.</p>';
-            } else {
-                body.innerHTML = data.Answer.map(function(rec) {
-                    return '<div class="db-info-row"><span class="lbl">' + rec.type + '</span><span class="val" style="word-break:break-all;max-width:70%">' +
-                        rec.data + ' <span style="color:var(--gray-dim);font-size:11px;margin-left:6px">TTL ' + rec.TTL + 's</span></span></div>';
-                }).join('');
-            }
-            result.style.display = 'block';
-        })
-        .catch(function(e) {
-            errEl.textContent = 'DNS lookup failed: ' + e.message;
-            errEl.style.display = 'block';
-        });
-    };
-
-    // Ping (HTTP RTT)
-    window.doPing = function() {
-        var host   = document.getElementById('ping-host').value.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-        var result = document.getElementById('ping-result');
-        var errEl  = document.getElementById('ping-error');
-        result.style.display = 'none';
-        errEl.style.display  = 'none';
-        if (!host) { errEl.textContent = 'Enter a host.'; errEl.style.display = 'block'; return; }
-
-        var attempts = 4;
-        var rtts     = [];
-        var done     = 0;
-
-        document.getElementById('ping-result-body').innerHTML =
-            '<p style="color:var(--gray);font-size:14px"><i class="fas fa-spinner fa-spin"></i> Pinging ' + host + '…</p>';
-        result.style.display = 'block';
-
-        function attempt() {
-            var start = Date.now();
-            // Use no-cors — will always resolve (opaque response) if host is reachable over HTTP/S
-            fetch('https://' + host + '/?_cb=' + Date.now(), { method: 'HEAD', mode: 'no-cors', cache: 'no-store' })
-                .then(function() { rtts.push(Date.now() - start); })
-                .catch(function() { /* network-level failure */ })
-                .finally(function() {
-                    done++;
-                    if (done === attempts) showPingResults(host, rtts, attempts);
-                });
-        }
-
-        for (var i = 0; i < attempts; i++) {
-            (function(delay) { setTimeout(attempt, delay); })(i * 350);
-        }
-    };
-
-    function showPingResults(host, rtts, attempts) {
-        var body = document.getElementById('ping-result-body');
-        var loss = Math.round(((attempts - rtts.length) / attempts) * 100);
-        if (!rtts.length) {
-            body.innerHTML =
-                '<div class="db-info-row"><span class="lbl">Status</span><span class="val"><span class="badge badge-red">Unreachable</span></span></div>' +
-                '<div class="db-info-row"><span class="lbl">Host</span><span class="val">' + host + '</span></div>' +
-                '<p style="font-size:12px;color:var(--gray-dim);margin-top:10px">Host may be down, not serving HTTPS, or blocked on your network.</p>';
-            return;
-        }
-        var min = Math.min.apply(null, rtts);
-        var max = Math.max.apply(null, rtts);
-        var avg = Math.round(rtts.reduce(function(a,b){return a+b;},0) / rtts.length);
-        body.innerHTML =
-            '<div class="db-info-row"><span class="lbl">Status</span><span class="val"><span class="badge badge-green">Reachable</span></span></div>' +
-            '<div class="db-info-row"><span class="lbl">Host</span><span class="val">' + host + '</span></div>' +
-            '<div class="db-info-row"><span class="lbl">Min RTT</span><span class="val">' + min + ' ms</span></div>' +
-            '<div class="db-info-row"><span class="lbl">Avg RTT</span><span class="val">' + avg + ' ms</span></div>' +
-            '<div class="db-info-row"><span class="lbl">Max RTT</span><span class="val">' + max + ' ms</span></div>' +
-            '<div class="db-info-row"><span class="lbl">Packet loss</span><span class="val">' + loss + '%</span></div>' +
-            '<div class="db-info-row"><span class="lbl">Samples</span><span class="val">' + rtts.length + ' / ' + attempts + '</span></div>';
-    }
-
-    // Port Check via HackerTarget
-    window.setPort = function(p) { document.getElementById('port-port').value = p; };
-
-    window.checkPort = function() {
-        var host   = document.getElementById('port-host').value.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-        var port   = parseInt(document.getElementById('port-port').value);
-        var result = document.getElementById('port-result');
-        var errEl  = document.getElementById('port-error');
-        result.style.display = 'none';
-        errEl.style.display  = 'none';
-        if (!host)                              { errEl.textContent = 'Enter a host.'; errEl.style.display = 'block'; return; }
-        if (!port || port < 1 || port > 65535) { errEl.textContent = 'Enter a valid port (1–65535).'; errEl.style.display = 'block'; return; }
-
-        document.getElementById('port-result-body').innerHTML =
-            '<p style="color:var(--gray);font-size:14px"><i class="fas fa-spinner fa-spin"></i> Checking ' + host + ':' + port + '…</p>';
-        result.style.display = 'block';
-
-        fetch('https://api.hackertarget.com/nmap/?q=' + encodeURIComponent(host + ':' + port))
-            .then(function(r) { return r.text(); })
-            .then(function(text) {
-                if (text.includes('error') && text.includes('API count')) {
-                    errEl.textContent = 'HackerTarget rate limit reached. Wait a minute and try again.';
-                    errEl.style.display = 'block';
-                    result.style.display = 'none';
-                    return;
-                }
-                var open   = /open/i.test(text);
-                var status = open
-                    ? '<span class="badge badge-green">Open</span>'
-                    : '<span class="badge badge-red">Closed / Filtered</span>';
-                document.getElementById('port-result-body').innerHTML =
-                    '<div class="db-info-row"><span class="lbl">Status</span><span class="val">' + status + '</span></div>' +
-                    '<div class="db-info-row"><span class="lbl">Host</span><span class="val">' + host + '</span></div>' +
-                    '<div class="db-info-row"><span class="lbl">Port</span><span class="val">' + port + '</span></div>' +
-                    '<div class="db-output" style="margin-top:10px;font-size:12px">' +
-                        text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') +
-                    '</div>';
-            })
-            .catch(function() {
-                errEl.textContent = 'Port check failed. Check your connection or try again shortly.';
-                errEl.style.display = 'block';
-                result.style.display = 'none';
-            });
-    };
-
-    // WHOIS via RDAP
-    window.doWhois = function() {
-        var query  = document.getElementById('whois-query').value.trim();
-        var result = document.getElementById('whois-result');
-        var errEl  = document.getElementById('whois-error');
-        result.style.display = 'none';
-        errEl.style.display  = 'none';
-        if (!query) { errEl.textContent = 'Enter a domain or IP address.'; errEl.style.display = 'block'; return; }
-
-        // Remove protocol/path
-        query = query.replace(/^https?:\/\//, '').split('/')[0];
-        var isIP = /^(\d{1,3}\.){3}\d{1,3}$/.test(query) || /^[0-9a-f:]{2,}$/i.test(query);
-        var apiUrl = isIP
-            ? 'https://rdap.org/ip/' + encodeURIComponent(query)
-            : 'https://rdap.org/domain/' + encodeURIComponent(query);
-
-        document.getElementById('whois-result-title').textContent = 'WHOIS — ' + query;
-        document.getElementById('whois-result-body').innerHTML =
-            '<p style="color:var(--gray);font-size:14px"><i class="fas fa-spinner fa-spin"></i> Looking up…</p>';
-        result.style.display = 'block';
-
-        fetch(apiUrl)
-            .then(function(r) {
-                if (!r.ok) throw new Error('Not found (HTTP ' + r.status + ')');
-                return r.json();
-            })
-            .then(function(d) {
-                var rows = [];
-                if (d.ldhName || d.handle) rows.push(['Domain / Handle', d.ldhName || d.handle]);
-                if (d.startAddress)        rows.push(['IP range start', d.startAddress]);
-                if (d.endAddress)          rows.push(['IP range end',   d.endAddress]);
-                if (d.ipVersion)           rows.push(['IP version', d.ipVersion]);
-                if (d.type)                rows.push(['Type', d.type]);
-                if (d.status && d.status.length) rows.push(['Status', d.status.join(', ')]);
-                if (d.country)             rows.push(['Country', d.country]);
-
-                // Entities (registrar, registrant, etc.)
-                if (d.entities) {
-                    d.entities.forEach(function(e) {
-                        if (!e.vcardArray || !e.roles) return;
-                        var name = '';
-                        e.vcardArray[1].forEach(function(v) { if (v[0]==='fn') name = v[3]; });
-                        if (name) rows.push([e.roles.join(' / '), name]);
-                    });
-                }
-
-                // Events (dates)
-                if (d.events) {
-                    d.events.forEach(function(ev) {
-                        var label = ev.eventAction.replace(/-/g, ' ');
-                        rows.push([label, new Date(ev.eventDate).toLocaleString()]);
-                    });
-                }
-
-                if (!rows.length) {
-                    document.getElementById('whois-result-body').innerHTML =
-                        '<div class="db-output" style="font-size:12px;white-space:pre-wrap">' +
-                        JSON.stringify(d, null, 2).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
-                } else {
-                    document.getElementById('whois-result-body').innerHTML = rows.map(function(r) {
-                        return '<div class="db-info-row"><span class="lbl">' + r[0] +
-                            '</span><span class="val" style="word-break:break-all;max-width:65%">' + r[1] + '</span></div>';
-                    }).join('');
-                }
-            })
-            .catch(function(e) {
-                errEl.textContent = 'WHOIS lookup failed: ' + e.message + '. Try without "www" prefix.';
-                errEl.style.display = 'block';
-                result.style.display = 'none';
-            });
-    };
-
-    // ── Traceroute (MTR via HackerTarget) ─────────────────────
-    window.doTraceroute = function() {
-        var host   = document.getElementById('traceroute-host').value.trim().replace(/^https?:\/\//, '').split('/')[0];
-        var result = document.getElementById('traceroute-result');
-        var errEl  = document.getElementById('traceroute-error');
-        result.style.display = 'none';
-        errEl.style.display  = 'none';
-        if (!host) { errEl.textContent = 'Enter a host.'; errEl.style.display = 'block'; return; }
-
-        document.getElementById('traceroute-result-title').textContent = 'Traceroute — ' + host;
-        document.getElementById('traceroute-result-body').innerHTML =
-            '<p style="color:var(--gray);font-size:14px"><i class="fas fa-spinner fa-spin"></i> Tracing route to ' + host + '… (may take 10–20s)</p>';
-        result.style.display = 'block';
-
-        fetch('https://api.hackertarget.com/mtr/?q=' + encodeURIComponent(host))
-            .then(function(r) { return r.text(); })
-            .then(function(text) {
-                if (/error|API count/i.test(text)) {
-                    errEl.textContent = 'HackerTarget rate limit reached. Wait a minute and try again.';
-                    errEl.style.display = 'block';
-                    result.style.display = 'none';
-                    return;
-                }
-                var lines = text.split('\n').filter(function(l) { return /^\s*\d+\./.test(l); });
-                if (!lines.length) {
-                    document.getElementById('traceroute-result-body').innerHTML =
-                        '<p style="color:var(--gray);font-size:14px">No hops found — host may be unreachable.</p>';
-                    return;
-                }
-                var maxAvg = 0;
-                var hops = lines.map(function(line) {
-                    var parts = line.trim().split(/\s+/);
-                    var num   = parts[0].replace(/[^0-9]/g, '');
-                    var iface = parts[1] || '???';
-                    var loss  = parts[2] || '?%';
-                    var avg   = parseFloat(parts[5]) || 0;
-                    if (avg > maxAvg) maxAvg = avg;
-                    return { num: num, iface: iface, loss: loss, avg: avg };
-                });
-                document.getElementById('traceroute-result-body').innerHTML = hops.map(function(h) {
-                    var barW = maxAvg > 0 ? Math.max(4, Math.round((h.avg / maxAvg) * 80)) : 4;
-                    var latColor = h.avg < 20 ? '#30d158' : h.avg < 80 ? '#ffd60a' : '#ff453a';
-                    return '<div class="hop-row">' +
-                        '<span class="hop-num">' + h.num + '</span>' +
-                        '<span class="hop-host">' + h.iface + '</span>' +
-                        '<span class="hop-loss" style="color:' + (parseFloat(h.loss)>0?'#ff9f0a':'var(--gray)') + '">' + h.loss + '</span>' +
-                        '<span class="hop-latency" style="color:' + latColor + '">' + (h.avg ? h.avg.toFixed(1) + 'ms' : '—') + '</span>' +
-                        '<div class="hop-bar-wrap"><div class="hop-bar" style="width:' + barW + 'px;background:' + latColor + '"></div></div>' +
-                        '</div>';
-                }).join('');
-            })
-            .catch(function(e) {
-                errEl.textContent = 'Traceroute failed: ' + e.message;
-                errEl.style.display = 'block';
-                result.style.display = 'none';
-            });
-    };
-
-    // ── IP Geolocation (ipapi.co + Leaflet) ───────────────────
-    var _geoMap = null;
-    var _geoMarker = null;
-
-    window.doGeoIP = function() {
-        var query  = document.getElementById('geoip-query').value.trim().replace(/^https?:\/\//, '').split('/')[0];
-        var result = document.getElementById('geoip-result');
-        var errEl  = document.getElementById('geoip-error');
-        result.style.display = 'none';
-        errEl.style.display  = 'none';
-        if (!query) { errEl.textContent = 'Enter an IP address or domain.'; errEl.style.display = 'block'; return; }
-
-        fetch('https://ipapi.co/' + encodeURIComponent(query) + '/json/')
-            .then(function(r) { return r.json(); })
-            .then(function(d) {
-                if (d.error) { errEl.textContent = d.reason || 'Lookup failed.'; errEl.style.display = 'block'; return; }
-
-                result.style.display = 'block';
-
-                // Map
-                var lat = d.latitude, lng = d.longitude;
-                if (lat && lng) {
-                    setTimeout(function() {
-                        if (!_geoMap) {
-                            _geoMap = L.map('geoip-map').setView([lat, lng], 10);
-                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                attribution: '© OpenStreetMap contributors', maxZoom: 18
-                            }).addTo(_geoMap);
-                            _geoMarker = L.marker([lat, lng]).addTo(_geoMap);
-                        } else {
-                            _geoMap.setView([lat, lng], 10);
-                            if (_geoMarker) _geoMarker.setLatLng([lat, lng]);
-                            _geoMap.invalidateSize();
-                        }
-                        _geoMarker.bindPopup('<b>' + (d.city || '') + '</b><br>' + (d.country_name || '')).openPopup();
-                    }, 50);
-                }
-
-                var rows = [];
-                if (d.ip)           rows.push(['IP Address', d.ip]);
-                if (d.city)         rows.push(['City', d.city]);
-                if (d.region)       rows.push(['Region', d.region]);
-                if (d.country_name) rows.push(['Country', d.country_name + ' ' + (d.country_code || '')]);
-                if (d.postal)       rows.push(['Postal code', d.postal]);
-                if (d.timezone)     rows.push(['Timezone', d.timezone]);
-                if (d.org)          rows.push(['ISP / Org', d.org]);
-                if (d.asn)          rows.push(['ASN', d.asn]);
-                if (lat && lng)     rows.push(['Coordinates', lat.toFixed(4) + ', ' + lng.toFixed(4)]);
-
-                document.getElementById('geoip-result-body').innerHTML = rows.map(function(r) {
-                    return '<div class="db-info-row"><span class="lbl">' + r[0] + '</span><span class="val">' + r[1] + '</span></div>';
-                }).join('');
-            })
-            .catch(function(e) {
-                errEl.textContent = 'Geolocation lookup failed: ' + e.message;
-                errEl.style.display = 'block';
-            });
-    };
-
-    // ── SSL Certificate Checker (SSL Labs API) ─────────────────
-    var _sslPollTimer = null;
-
-    window.checkSSL = function() {
-        var domain = document.getElementById('ssl-domain').value.trim().replace(/^https?:\/\//, '').split('/')[0];
-        var result = document.getElementById('ssl-result');
-        var errEl  = document.getElementById('ssl-error');
-        result.style.display = 'none';
-        errEl.style.display  = 'none';
-        if (!domain) { errEl.textContent = 'Enter a domain name.'; errEl.style.display = 'block'; return; }
-        if (_sslPollTimer) { clearInterval(_sslPollTimer); _sslPollTimer = null; }
-
-        document.getElementById('ssl-grade-val').textContent = '…';
-        document.getElementById('ssl-grade-val').className = 'ssl-grade';
-        document.getElementById('ssl-grade-sub').textContent = 'Scanning…';
-        document.getElementById('ssl-cert-body').innerHTML = '<p style="color:var(--gray);font-size:13px"><i class="fas fa-spinner fa-spin"></i> Fetching…</p>';
-        document.getElementById('ssl-expiry-body').innerHTML = '';
-        document.getElementById('ssl-details-body').innerHTML = '';
-        result.style.display = 'block';
-
-        function fetchSSL(startNew) {
-            var url = 'https://api.ssllabs.com/api/v3/analyze?host=' + encodeURIComponent(domain) +
-                      (startNew ? '&startNew=on' : '&fromCache=on&maxAge=24') + '&all=done';
-            fetch(url)
-                .then(function(r) { return r.json(); })
-                .then(function(d) {
-                    if (d.status === 'READY') {
-                        if (_sslPollTimer) { clearInterval(_sslPollTimer); _sslPollTimer = null; }
-                        renderSSL(domain, d);
-                    } else if (d.status === 'ERROR') {
-                        if (_sslPollTimer) { clearInterval(_sslPollTimer); _sslPollTimer = null; }
-                        errEl.textContent = 'SSL Labs error: ' + (d.statusMessage || 'Unknown error');
-                        errEl.style.display = 'block';
-                        result.style.display = 'none';
-                    } else {
-                        // IN_PROGRESS / DNS — start polling
-                        var msg = d.status === 'DNS' ? 'Resolving DNS…' : 'Scan in progress (' + (d.status||'') + ')…';
-                        document.getElementById('ssl-grade-sub').textContent = msg;
-                        if (!_sslPollTimer) {
-                            _sslPollTimer = setInterval(function() { fetchSSL(false); }, 8000);
-                        }
-                    }
-                })
-                .catch(function(e) {
-                    if (_sslPollTimer) { clearInterval(_sslPollTimer); _sslPollTimer = null; }
-                    // Try starting a fresh scan
-                    if (startNew) {
-                        errEl.textContent = 'SSL check failed: ' + e.message;
-                        errEl.style.display = 'block';
-                        result.style.display = 'none';
-                    } else {
-                        fetchSSL(true);
-                    }
-                });
-        }
-
-        fetchSSL(false);
-    };
-
-    function renderSSL(domain, d) {
-        var ep    = d.endpoints && d.endpoints[0];
-        var grade = ep ? ep.grade : '?';
-        var gradeEl = document.getElementById('ssl-grade-val');
-        gradeEl.textContent = grade || '?';
-        gradeEl.className = 'ssl-grade grade-' + (grade ? grade[0].toLowerCase() : 'f');
-        document.getElementById('ssl-grade-sub').textContent = ep && ep.hasWarnings ? 'Warnings present' : 'No warnings';
-
-        var cert = d.certs && d.certs[0];
-        if (cert) {
-            document.getElementById('ssl-cert-body').innerHTML =
-                '<div class="db-info-row" style="flex-direction:column;align-items:flex-start;gap:2px">' +
-                '<span class="lbl">Subject</span><span class="val" style="font-size:12px;word-break:break-all">' + (cert.subject||'—') + '</span></div>' +
-                '<div class="db-info-row" style="flex-direction:column;align-items:flex-start;gap:2px">' +
-                '<span class="lbl">Issuer</span><span class="val" style="font-size:12px">' + (cert.issuerLabel||'—') + '</span></div>' +
-                '<div class="db-info-row"><span class="lbl">Key</span><span class="val">' + (cert.keyAlg||'') + ' ' + (cert.keyStrength||'') + '-bit</span></div>';
-
-            var notAfter  = cert.notAfter  ? new Date(cert.notAfter)  : null;
-            var notBefore = cert.notBefore ? new Date(cert.notBefore) : null;
-            var now       = new Date();
-            var daysLeft  = notAfter ? Math.round((notAfter - now) / 86400000) : null;
-            var expiryColor = daysLeft === null ? 'var(--gray)' : daysLeft < 14 ? '#ff453a' : daysLeft < 30 ? '#ffd60a' : '#30d158';
-            document.getElementById('ssl-expiry-body').innerHTML =
-                (notBefore ? '<div class="db-info-row"><span class="lbl">Valid from</span><span class="val" style="font-size:12px">' + notBefore.toLocaleDateString() + '</span></div>' : '') +
-                (notAfter  ? '<div class="db-info-row"><span class="lbl">Expires</span><span class="val" style="font-size:12px">' + notAfter.toLocaleDateString() + '</span></div>' : '') +
-                (daysLeft !== null ? '<div class="db-info-row"><span class="lbl">Days left</span><span class="val" style="color:' + expiryColor + ';font-weight:700">' + daysLeft + ' days</span></div>' : '');
-        }
-
-        var detailRows = [];
-        if (ep && ep.ipAddress)      detailRows.push(['Server IP', ep.ipAddress]);
-        if (d.protocol)              detailRows.push(['Protocol', d.protocol]);
-        if (ep && ep.statusMessage)  detailRows.push(['Status', ep.statusMessage]);
-        detailRows.push(['Tested', new Date().toLocaleString()]);
-        document.getElementById('ssl-details-body').innerHTML = detailRows.map(function(r) {
-            return '<div class="db-info-row"><span class="lbl">' + r[0] + '</span><span class="val">' + r[1] + '</span></div>';
-        }).join('');
-    }
-
-    // ── Website Status Monitor ─────────────────────────────────
-    window.checkUptime = function() {
-        var raw    = document.getElementById('uptime-url').value.trim();
-        var errEl  = document.getElementById('uptime-error');
-        var result = document.getElementById('uptime-result');
-        errEl.style.display  = 'none';
-        result.style.display = 'none';
-
-        if (!raw) { errEl.textContent = 'Enter a URL.'; errEl.style.display = 'block'; return; }
-        var url  = /^https?:\/\//i.test(raw) ? raw : 'https://' + raw;
-        var host = url.replace(/^https?:\/\//, '').split('/')[0];
-
-        document.getElementById('uptime-result-body').innerHTML =
-            '<p style="color:var(--gray);font-size:14px"><i class="fas fa-spinner fa-spin"></i> Checking ' + host + '…</p>';
-        result.style.display = 'block';
-
-        // Browser-side reachability
-        var browserStart = Date.now();
-        var browserStatus = 'unknown';
-        var browserRtt = null;
-        var apiDone = false, browserDone = false;
-        var apiStatus = null, apiCode = null, apiServer = null;
-
-        function finish() {
-            if (!apiDone || !browserDone) return;
-            var up = apiStatus === 'up' || browserStatus === 'reachable';
-            var body = '<div class="db-info-row"><span class="lbl">Status</span><span class="val">' +
-                (up ? '<span class="badge badge-green">Online</span>' : '<span class="badge badge-red">Offline / Unreachable</span>') + '</span></div>' +
-                '<div class="db-info-row"><span class="lbl">Host</span><span class="val">' + host + '</span></div>';
-            if (apiCode)   body += '<div class="db-info-row"><span class="lbl">HTTP status</span><span class="val">' + apiCode + '</span></div>';
-            if (apiServer) body += '<div class="db-info-row"><span class="lbl">Server</span><span class="val">' + apiServer + '</span></div>';
-            if (browserRtt !== null) body += '<div class="db-info-row"><span class="lbl">Browser RTT</span><span class="val">' + browserRtt + ' ms</span></div>';
-            body += '<div class="db-info-row"><span class="lbl">Checked</span><span class="val">' + new Date().toLocaleTimeString() + '</span></div>';
-            document.getElementById('uptime-result-body').innerHTML = body;
-        }
-
-        // Browser check (no-cors)
-        fetch(url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now(), { method: 'HEAD', mode: 'no-cors', cache: 'no-store' })
-            .then(function() { browserStatus = 'reachable'; browserRtt = Date.now() - browserStart; })
-            .catch(function() { browserStatus = 'unreachable'; })
-            .finally(function() { browserDone = true; finish(); });
-
-        // Server-side check via HackerTarget headers
-        fetch('https://api.hackertarget.com/httpheaders/?q=' + encodeURIComponent(url))
-            .then(function(r) { return r.text(); })
-            .then(function(text) {
-                if (/error|API count/i.test(text)) { apiStatus = 'unknown'; apiDone = true; finish(); return; }
-                var codeMatch = text.match(/HTTP\/[\d.]+ (\d{3})/i);
-                if (codeMatch) { apiCode = codeMatch[1]; apiStatus = parseInt(codeMatch[1]) < 500 ? 'up' : 'down'; }
-                var srvMatch = text.match(/^[Ss]erver:\s*(.+)$/m);
-                if (srvMatch) apiServer = srvMatch[1].trim();
-                apiDone = true; finish();
-            })
-            .catch(function() { apiStatus = 'unknown'; apiDone = true; finish(); });
-    };
-
-    // ── Headers Inspector ──────────────────────────────────────
-    window.inspectHeaders = function() {
-        var raw   = document.getElementById('headers-url').value.trim();
-        var errEl = document.getElementById('headers-error');
-        var result = document.getElementById('headers-result');
-        errEl.style.display   = 'none';
-        result.style.display  = 'none';
-
-        if (!raw) { errEl.textContent = 'Enter a URL.'; errEl.style.display = 'block'; return; }
-        var url = /^https?:\/\//i.test(raw) ? raw : 'https://' + raw;
-
-        document.getElementById('headers-summary').innerHTML =
-            '<p style="color:var(--gray);font-size:14px"><i class="fas fa-spinner fa-spin"></i> Fetching headers…</p>';
-        result.style.display = 'block';
-        document.getElementById('headers-result-body').innerHTML = '';
-
-        fetch('https://api.hackertarget.com/httpheaders/?q=' + encodeURIComponent(url))
-            .then(function(r) { return r.text(); })
-            .then(function(text) {
-                if (/error|API count/i.test(text)) {
-                    errEl.textContent = 'HackerTarget rate limit reached. Wait a minute and try again.';
-                    errEl.style.display = 'block';
-                    result.style.display = 'none';
-                    return;
-                }
-
-                var lines = text.split('\n').filter(function(l) { return l.trim(); });
-                var statusLine = lines[0] || '';
-                var codeMatch  = statusLine.match(/HTTP\/[\d.]+ (\d{3}[^\r\n]*)/i);
-                var statusCode = codeMatch ? codeMatch[1] : statusLine;
-                var isOk       = /^[123]/.test(statusCode);
-
-                document.getElementById('headers-summary').innerHTML =
-                    '<div class="db-info-row"><span class="lbl">Status</span><span class="val">' +
-                    '<span class="badge ' + (isOk ? 'badge-green' : 'badge-red') + '">HTTP ' + statusCode + '</span>' +
-                    '</span></div>' +
-                    '<div class="db-info-row"><span class="lbl">URL</span><span class="val" style="word-break:break-all;font-size:12px">' + url + '</span></div>';
-
-                // Parse headers (skip first status line)
-                var headers = [];
-                lines.slice(1).forEach(function(line) {
-                    var sep = line.indexOf(':');
-                    if (sep < 0) return;
-                    var name = line.slice(0, sep).trim();
-                    var val  = line.slice(sep + 1).trim();
-                    if (name) headers.push({ name: name, val: val });
-                });
-
-                // Categorise
-                var cats = {
-                    'Security': ['strict-transport-security','content-security-policy','x-frame-options','x-content-type-options','x-xss-protection','referrer-policy','permissions-policy','cross-origin-opener-policy','cross-origin-resource-policy','cross-origin-embedder-policy'],
-                    'Caching':  ['cache-control','expires','etag','last-modified','age','pragma','vary'],
-                    'Server':   ['server','x-powered-by','via','x-forwarded-for','x-real-ip','host'],
-                    'Content':  ['content-type','content-length','content-encoding','content-language','transfer-encoding'],
-                    'Other':    []
-                };
-                var grouped = { Security: [], Caching: [], Server: [], Content: [], Other: [] };
-                headers.forEach(function(h) {
-                    var lower = h.name.toLowerCase();
-                    var found = false;
-                    ['Security','Caching','Server','Content'].forEach(function(cat) {
-                        if (!found && cats[cat].indexOf(lower) >= 0) { grouped[cat].push(h); found = true; }
-                    });
-                    if (!found) grouped.Other.push(h);
-                });
-
-                var html = '';
-                ['Security','Caching','Content','Server','Other'].forEach(function(cat) {
-                    if (!grouped[cat].length) return;
-                    html += '<div class="db-card" style="margin-top:10px"><div class="hdr-cat">' + cat + '</div>';
-                    grouped[cat].forEach(function(h) {
-                        html += '<div class="db-info-row"><span class="lbl" style="font-family:\'SF Mono\',monospace;font-size:11px">' +
-                            h.name + '</span><span class="val" style="font-size:12px;word-break:break-all;max-width:65%">' +
-                            h.val.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span></div>';
-                    });
-                    html += '</div>';
-                });
-
-                document.getElementById('headers-result-body').innerHTML = html || '<p style="color:var(--gray);font-size:14px">No headers returned.</p>';
-            })
-            .catch(function(e) {
-                errEl.textContent = 'Headers fetch failed: ' + e.message;
-                errEl.style.display = 'block';
-                result.style.display = 'none';
-            });
-    };
-
-    // ── JSON ──────────────────────────────────────────────────
-    window.jsonFormat = function() {
-        var input  = document.getElementById('json-input').value.trim();
-        var out    = document.getElementById('json-output');
-        var status = document.getElementById('json-status');
-        try {
-            var parsed = JSON.parse(input);
-            out.value = JSON.stringify(parsed, null, 2);
-            status.innerHTML = '<span style="color:#30d158"><i class="fas fa-check-circle"></i> Valid JSON</span>';
-        } catch(e) {
-            status.innerHTML = '<span style="color:#ff453a"><i class="fas fa-times-circle"></i> ' + e.message + '</span>';
-        }
-    };
-
-    window.jsonMinify = function() {
-        var input  = document.getElementById('json-input').value.trim();
-        var out    = document.getElementById('json-output');
-        var status = document.getElementById('json-status');
-        try {
-            out.value = JSON.stringify(JSON.parse(input));
-            status.innerHTML = '<span style="color:#30d158"><i class="fas fa-check-circle"></i> Minified</span>';
-        } catch(e) {
-            status.innerHTML = '<span style="color:#ff453a"><i class="fas fa-times-circle"></i> ' + e.message + '</span>';
-        }
-    };
-
-    window.jsonCopy = function() {
-        var val = document.getElementById('json-output').value;
-        if (val) { navigator.clipboard.writeText(val); showToast('Copied!'); }
-    };
-
-    window.jsonClear = function() {
-        document.getElementById('json-input').value  = '';
-        document.getElementById('json-output').value = '';
-        document.getElementById('json-status').textContent = '';
-    };
-
-    // ── Base64 ────────────────────────────────────────────────
-    window.b64Encode = function() {
-        var input  = document.getElementById('b64-input').value;
-        var status = document.getElementById('b64-status');
-        try {
-            document.getElementById('b64-output').value = btoa(unescape(encodeURIComponent(input)));
-            status.innerHTML = '<span style="color:#30d158"><i class="fas fa-check-circle"></i> Encoded</span>';
-        } catch(e) {
-            status.innerHTML = '<span style="color:#ff453a">Encode failed: ' + e.message + '</span>';
-        }
-    };
-
-    window.b64Decode = function() {
-        var input  = document.getElementById('b64-input').value.trim();
-        var status = document.getElementById('b64-status');
-        try {
-            document.getElementById('b64-output').value = decodeURIComponent(escape(atob(input)));
-            status.innerHTML = '<span style="color:#30d158"><i class="fas fa-check-circle"></i> Decoded</span>';
-        } catch(e) {
-            status.innerHTML = '<span style="color:#ff453a">Decode failed: invalid Base64 input</span>';
-        }
-    };
-
-    window.b64Copy = function() {
-        var val = document.getElementById('b64-output').value;
-        if (val) { navigator.clipboard.writeText(val); showToast('Copied!'); }
-    };
-
-    // ── Colour Picker ─────────────────────────────────────────
-    window.updateColour = function(hex) {
-        document.getElementById('colour-picker-input').value = hex;
-        document.getElementById('colour-hex-input').value    = hex;
-        document.getElementById('colour-swatch').style.background = hex;
-        var r = parseInt(hex.slice(1,3),16),
-            g = parseInt(hex.slice(3,5),16),
-            b = parseInt(hex.slice(5,7),16);
-        var rgb = 'rgb(' + r + ', ' + g + ', ' + b + ')';
-        document.getElementById('out-hex').textContent = hex.toUpperCase();
-        document.getElementById('out-rgb').textContent = rgb;
-        var hsl    = rgbToHsl(r,g,b);
-        var hslStr = 'hsl(' + hsl[0] + ', ' + hsl[1] + '%, ' + hsl[2] + '%)';
-        document.getElementById('out-hsl').textContent = hslStr;
-        document.getElementById('out-css').textContent =
-            'color: ' + hex.toUpperCase() + ';\n' +
-            'background-color: ' + hex.toUpperCase() + ';\n' +
-            '/* rgb: ' + rgb + ' */\n' +
-            '/* hsl: ' + hslStr + ' */';
-    };
-
-    function rgbToHsl(r,g,b) {
-        r/=255; g/=255; b/=255;
-        var max=Math.max(r,g,b), min=Math.min(r,g,b), h,s,l=(max+min)/2;
-        if(max===min){ h=s=0; } else {
-            var d=max-min; s=l>0.5?d/(2-max-min):d/(max+min);
-            switch(max){ case r:h=(g-b)/d+(g<b?6:0);break; case g:h=(b-r)/d+2;break; case b:h=(r-g)/d+4;break; }
-            h=Math.round(h/6*360); s=Math.round(s*100); l=Math.round(l*100);
-        }
-        return [h,s,l];
-    }
-
-    document.getElementById('colour-picker-input').addEventListener('input', function() {
-        updateColour(this.value);
-    });
-
-    window.applyHexInput = function() {
-        var val = document.getElementById('colour-hex-input').value.trim();
-        if (/^#[0-9a-fA-F]{6}$/.test(val)) updateColour(val.toLowerCase());
-    };
-
-    window.copyVal = function(id) {
-        navigator.clipboard.writeText(document.getElementById(id).textContent);
-        showToast('Copied!');
-    };
-
-    // ── Regex ─────────────────────────────────────────────────
-    window.runRegex = function() {
-        var pattern = document.getElementById('regex-pattern').value;
-        var flags   = document.getElementById('regex-flags').value;
-        var input   = document.getElementById('regex-input').value;
-        var output  = document.getElementById('regex-output');
-        var errEl   = document.getElementById('regex-error');
-        var countEl = document.getElementById('regex-count');
-        errEl.textContent = '';
-        if (!pattern) { output.innerHTML = escHtml(input); return; }
-        try {
-            var matches = Array.from(input.matchAll(new RegExp(pattern, flags.includes('g') ? flags : flags+'g')));
-            countEl.textContent = matches.length + (matches.length===1?' match':' matches');
-            output.innerHTML = escHtml(input).replace(
-                new RegExp(escapeRegExp(pattern), flags.replace(/[^gimsuy]/g,'')),
-                function(m) { return '<mark class="regex-match">' + escHtml(m) + '</mark>'; }
-            );
-        } catch(e) {
-            errEl.textContent = 'Error: ' + e.message;
-            output.innerHTML  = '';
-            countEl.textContent = '0 matches';
-        }
-    };
-
-    function escHtml(s) {
-        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    function escapeRegExp(s) {
-        return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    }
-
-    document.getElementById('regex-pattern').addEventListener('input', runRegex);
-    document.getElementById('regex-input').addEventListener('input', runRegex);
-    document.getElementById('regex-flags').addEventListener('input', runRegex);
-
-    // ── Timestamp ─────────────────────────────────────────────
-    var clockInterval;
-    window.startClock = function() {
-        clearInterval(clockInterval);
-        updateClock();
-        clockInterval = setInterval(updateClock, 1000);
-    };
-
-    function updateClock() {
-        var now = new Date();
-        var ms  = now.getTime();
-        var s   = Math.floor(ms / 1000);
-        document.getElementById('ts-now-s').textContent  = s;
-        document.getElementById('ts-now-ms').textContent = ms;
-        document.getElementById('ts-utc').textContent    = now.toUTCString();
-        document.getElementById('ts-local').textContent  = now.toLocaleString();
-        document.getElementById('ts-iso').textContent    = now.toISOString();
-    }
-
-    window.convertUnixToDate = function() {
-        var val = parseInt(document.getElementById('ts-unix-in').value);
-        var out = document.getElementById('ts-unix-out');
-        if (isNaN(val)) { out.textContent = 'Enter a valid Unix timestamp'; return; }
-        var d = new Date(val < 1e12 ? val * 1000 : val);
-        out.textContent = 'UTC:    ' + d.toUTCString() + '\nLocal:  ' + d.toLocaleString() + '\nISO:    ' + d.toISOString();
-    };
-
-    window.convertDateToUnix = function() {
-        var val = document.getElementById('ts-date-in').value;
-        var out = document.getElementById('ts-date-out');
-        if (!val) { out.textContent = 'Pick a date'; return; }
-        var d = new Date(val);
-        out.textContent = 'Unix (s):  ' + Math.floor(d.getTime() / 1000) + '\nUnix (ms): ' + d.getTime();
-    };
-
-    // ── Pastebin ──────────────────────────────────────────────
-    var PASTE_KEY = 'hf_pastes';
-
-    function getPastes() {
-        try { return JSON.parse(localStorage.getItem(PASTE_KEY) || '[]'); } catch(e) { return []; }
-    }
-
-    function savePastes(list) { localStorage.setItem(PASTE_KEY, JSON.stringify(list)); }
-
-    window.savePaste = function() {
-        var code  = document.getElementById('paste-code').value;
-        var title = document.getElementById('paste-title').value.trim() || 'Untitled';
-        var lang  = document.getElementById('paste-lang').value;
-        if (!code.trim()) { showToast('Nothing to save'); return; }
-        var pastes = getPastes();
-        pastes.unshift({ id: Date.now().toString(36), title: title, lang: lang, code: code, date: new Date().toLocaleString() });
-        savePastes(pastes);
-        renderPasteList();
-        showToast('Saved!');
-    };
-
-    window.copyPasteContent = function() {
-        var val = document.getElementById('paste-code').value;
-        if (val) { navigator.clipboard.writeText(val); showToast('Copied!'); }
-    };
-
-    window.clearPaste = function() {
-        document.getElementById('paste-code').value  = '';
-        document.getElementById('paste-title').value = '';
-    };
-
-    window.deletePaste = function(id) {
-        savePastes(getPastes().filter(function(p) { return p.id !== id; }));
-        renderPasteList();
-    };
-
-    window.loadPasteIntoEditor = function(id) {
-        var paste = getPastes().find(function(p) { return p.id === id; });
-        if (!paste) return;
-        document.getElementById('paste-code').value  = paste.code;
-        document.getElementById('paste-title').value = paste.title;
-        document.getElementById('paste-lang').value  = paste.lang;
-        showToast('Loaded into editor');
-    };
-
-    window.copyPasteById = function(id) {
-        var paste = getPastes().find(function(p) { return p.id === id; });
-        if (paste) { navigator.clipboard.writeText(paste.code); showToast('Copied!'); }
-    };
-
-    window.renderPasteList = function() {
-        var pastes = getPastes();
-        var list   = document.getElementById('paste-list');
-        if (!pastes.length) {
-            list.innerHTML = '<p style="color:var(--gray-dim);font-size:13px;margin-top:4px">No saved pastes yet. Write some code and click Save.</p>';
-            return;
-        }
-        list.innerHTML =
-            '<h4 style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-dim);margin-bottom:10px;margin-top:4px">Saved Pastes (' + pastes.length + ')</h4>' +
-            pastes.map(function(p) {
-                var escaped = p.code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-                return '<div class="paste-item">' +
-                    '<div class="paste-item-header">' +
-                        '<span class="paste-item-title">' + p.title.replace(/</g,'&lt;') + '</span>' +
-                        '<span class="badge badge-blue" style="font-size:10px">' + p.lang + '</span>' +
-                        '<span style="font-size:11px;color:var(--gray-dim);flex-shrink:0">' + p.date + '</span>' +
-                        '<button class="db-btn-ghost" style="font-size:11px;padding:4px 10px;flex-shrink:0" onclick="loadPasteIntoEditor(\'' + p.id + '\')"><i class="fas fa-edit"></i> Edit</button>' +
-                        '<button class="db-btn-ghost" style="font-size:11px;padding:4px 10px;flex-shrink:0" onclick="copyPasteById(\'' + p.id + '\')"><i class="fas fa-copy"></i></button>' +
-                        '<button class="db-btn-ghost" style="font-size:11px;padding:4px 10px;flex-shrink:0;color:#ff453a;border-color:rgba(255,69,58,0.3)" onclick="deletePaste(\'' + p.id + '\')"><i class="fas fa-trash"></i></button>' +
-                    '</div>' +
-                    '<div class="paste-preview"><pre><code class="language-' + p.lang + '">' + escaped + '</code></pre></div>' +
-                '</div>';
-            }).join('');
-        // Apply syntax highlighting
-        if (window.hljs) {
-            list.querySelectorAll('pre code').forEach(function(el) { hljs.highlightElement(el); });
-        }
-    };
-
-    // ── METAR ─────────────────────────────────────────────────
-    window.setICAO = function(code) {
-        document.getElementById('metar-icao').value = code;
-        fetchWeather();
-    };
-
-    window.fetchWeather = function() {
-        var icao = document.getElementById('metar-icao').value.trim().toUpperCase();
-        var type = document.getElementById('metar-type').value;
-        var err  = document.getElementById('metar-error');
-        var res  = document.getElementById('metar-result');
-        err.style.display = 'none';
-        res.style.display = 'none';
-
-        if (!icao || icao.length < 3) {
-            err.textContent = 'Enter a valid ICAO code (e.g. YBBN)';
-            err.style.display = 'block';
-            return;
-        }
-
-        var apiUrl = type === 'metar'
-            ? 'https://aviationweather.gov/api/data/metar?ids=' + icao + '&format=json&hours=2'
-            : 'https://aviationweather.gov/api/data/taf?ids=' + icao + '&format=json';
-
-        function handleData(data) {
-            if (!data || !data.length) {
-                err.textContent = 'No data found for ' + icao + '. Check the ICAO code.';
-                err.style.display = 'block';
-                return;
-            }
-            var d = data[0];
-            document.getElementById('metar-raw-out').textContent = d.rawOb || d.rawTAF || JSON.stringify(d, null, 2);
-            document.getElementById('metar-decoded').innerHTML = decodeMETAR(d, type);
-            res.style.display = 'block';
-        }
-
-        // Try direct first, then fall back through CORS proxy
-        fetch(apiUrl)
-            .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-            .then(handleData)
-            .catch(function() {
-                fetch('https://corsproxy.io/?' + encodeURIComponent(apiUrl))
-                    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-                    .then(handleData)
-                    .catch(function() {
-                        err.textContent = 'Could not fetch weather data. The Aviation Weather Center may be unavailable, or your network is blocking the request.';
-                        err.style.display = 'block';
-                    });
-            });
-    };
-
-    function decodeMETAR(d, type) {
-        if (type === 'taf') {
-            return '<p style="font-size:14px;color:var(--gray)">TAF valid from <strong style="color:var(--white)">' +
-                (d.validTimeFrom || '—') + '</strong> to <strong style="color:var(--white)">' + (d.validTimeTo || '—') + '</strong></p>';
-        }
-        var rows = [
-            ['Station',          d.icaoId || '—'],
-            ['Station name',     d.name || '—'],
-            ['Observation time', d.reportTime ? new Date(d.reportTime).toLocaleString() : '—'],
-            ['Temperature',      d.temp  != null ? d.temp  + ' °C' : '—'],
-            ['Dewpoint',         d.dewp  != null ? d.dewp  + ' °C' : '—'],
-            ['Wind',             d.wdir  != null ? d.wdir + '° at ' + d.wspd + ' kt' + (d.wgst ? ' gusts ' + d.wgst + ' kt' : '') : '—'],
-            ['Visibility',       d.visib != null ? (d.visib >= 9999 ? '10+ km (CAVOK)' : d.visib + ' m') : '—'],
-            ['Altimeter',        d.altim != null ? d.altim.toFixed(1) + ' hPa' : '—'],
-            ['Weather',          d.wxString || 'NIL'],
-        ];
-        if (d.clouds && d.clouds.length) {
-            rows.push(['Clouds', d.clouds.map(function(c) { return c.cover + ' at ' + (c.base * 100) + ' ft'; }).join(' · ')]);
-        }
-        return rows.map(function(r) {
-            return '<div class="db-info-row"><span class="lbl">' + r[0] + '</span><span class="val">' + r[1] + '</span></div>';
-        }).join('');
-    }
-
-    // ── IP Info ───────────────────────────────────────────────
-    window.loadIPInfo = function() {
-        var card = document.getElementById('ip-card');
-        card.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray)"><i class="fas fa-spinner fa-spin" style="font-size:24px;margin-bottom:12px;display:block"></i>Loading...</div>';
-        fetch('https://ipapi.co/json/')
-            .then(function(r) { return r.json(); })
-            .then(function(d) {
-                var rows = [
-                    ['IP address',  d.ip            || '—'],
-                    ['City',        d.city          || '—'],
-                    ['Region',      d.region        || '—'],
-                    ['Country',     (d.country_name || '—') + ' ' + (d.country_code || '')],
-                    ['ISP / Org',   d.org           || '—'],
-                    ['Timezone',    d.timezone      || '—'],
-                    ['Latitude',    d.latitude      || '—'],
-                    ['Longitude',   d.longitude     || '—'],
-                ];
-                card.innerHTML = '<h4 style="margin-bottom:12px">Network Information</h4>' +
-                    rows.map(function(r) {
-                        return '<div class="db-info-row"><span class="lbl">' + r[0] + '</span><span class="val">' + r[1] + '</span></div>';
-                    }).join('');
-            })
-            .catch(function() {
-                card.innerHTML = '<p style="color:#ff453a;font-size:14px">Failed to fetch IP info. Try again.</p>';
-            });
-    };
-
-    // ── Password Generator ────────────────────────────────────
-    window.generatePassword = function() {
-        var len   = parseInt(document.getElementById('pass-length').value);
-        var upper = document.getElementById('pass-upper').checked;
-        var lower = document.getElementById('pass-lower').checked;
-        var digs  = document.getElementById('pass-digits').checked;
-        var syms  = document.getElementById('pass-symbols').checked;
-
-        var chars = '';
-        if (upper) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        if (lower) chars += 'abcdefghijklmnopqrstuvwxyz';
-        if (digs)  chars += '0123456789';
-        if (syms)  chars += '!@#$%^&*()-_=+[]{}|;:,.<>?';
-        if (!chars) { showToast('Select at least one character type'); return; }
-
-        var arr  = new Uint32Array(len);
-        crypto.getRandomValues(arr);
-        var pass = Array.from(arr).map(function(n) { return chars[n % chars.length]; }).join('');
-        document.getElementById('pass-value').textContent = pass;
-
-        var score  = (upper?1:0) + (lower?1:0) + (digs?1:0) + (syms?1:0);
-        var pct    = Math.min(100, (len / 64) * 60 + score * 10);
-        var fill   = document.getElementById('pass-strength-fill');
-        var label  = document.getElementById('pass-strength-label');
-        var colour, txt;
-        if (pct < 40)      { colour = '#ff453a'; txt = 'Weak'; }
-        else if (pct < 65) { colour = '#ff9f0a'; txt = 'Fair'; }
-        else if (pct < 80) { colour = '#ffd60a'; txt = 'Good'; }
-        else               { colour = '#30d158'; txt = 'Strong'; }
-        fill.style.width      = pct + '%';
-        fill.style.background = colour;
-        label.innerHTML = '<span style="color:' + colour + '">' + txt + '</span> &mdash; ' + len + ' characters, ' + score + '/4 character types';
-    };
-
-    window.copyPassword = function() {
-        var val = document.getElementById('pass-value').textContent;
-        if (val && val !== 'Click generate to create a password') {
-            navigator.clipboard.writeText(val); showToast('Password copied!');
-        }
-    };
-
-    // ── HTTP Request Builder ──────────────────────────────────
-    window.httpToggleBody = function() {
-        var method = document.getElementById('http-method').value;
-        var wrap   = document.getElementById('http-body-wrap');
-        wrap.style.opacity = ['POST','PUT','PATCH'].includes(method) ? '1' : '0.4';
-    };
-    httpToggleBody();
-
-    document.getElementById('http-url').addEventListener('keydown', function(e) { if (e.key === 'Enter') sendHttpRequest(); });
-
-    window.sendHttpRequest = async function() {
-        var method  = document.getElementById('http-method').value;
-        var url     = document.getElementById('http-url').value.trim();
-        var hdrsRaw = document.getElementById('http-headers').value.trim();
-        var body    = document.getElementById('http-body').value.trim();
-        var errEl   = document.getElementById('http-error');
-        var result  = document.getElementById('http-result');
-        errEl.style.display  = 'none';
-        result.style.display = 'none';
-        if (!url) { errEl.textContent = 'Enter a URL.'; errEl.style.display = 'block'; return; }
-
-        var headers = {};
-        if (hdrsRaw) {
-            hdrsRaw.split('\n').forEach(function(line) {
-                var idx = line.indexOf(':');
-                if (idx > 0) headers[line.substring(0, idx).trim()] = line.substring(idx + 1).trim();
-            });
-        }
-
-        var opts = { method: method, headers: headers };
-        if (['POST','PUT','PATCH'].includes(method) && body) opts.body = body;
-
-        var t0 = Date.now();
-        try {
-            var resp    = await fetch(url, opts);
-            var elapsed = Date.now() - t0;
-            var text    = await resp.text();
-            var formatted = text;
-            try { formatted = JSON.stringify(JSON.parse(text), null, 2); } catch(e) {}
-            document.getElementById('http-resp-body').value = formatted;
-            var hdrLines = [];
-            resp.headers.forEach(function(v, k) { hdrLines.push(k + ': ' + v); });
-            document.getElementById('http-resp-headers').textContent = hdrLines.join('\n') || '(none)';
-            var badge = document.getElementById('http-status-badge');
-            badge.textContent = resp.status + ' ' + resp.statusText;
-            badge.className   = 'badge ' + (resp.ok ? 'badge-green' : 'badge-red');
-            document.getElementById('http-time').textContent = elapsed + ' ms';
-            result.style.display = 'block';
-        } catch(e) {
-            errEl.textContent    = 'Request failed: ' + e.message + '. This is likely a CORS error.';
-            errEl.style.display  = 'block';
-        }
-    };
-
-    // ── JWT Decoder ───────────────────────────────────────────
-    document.getElementById('jwt-input').addEventListener('input', decodeJWT);
-
-    window.decodeJWT = function() {
-        var token  = document.getElementById('jwt-input').value.trim();
-        var errEl  = document.getElementById('jwt-error');
-        var result = document.getElementById('jwt-result');
-        errEl.textContent    = '';
-        result.style.display = 'none';
-        if (!token) return;
-        var parts = token.split('.');
-        if (parts.length !== 3) { errEl.textContent = 'Invalid JWT: expected 3 parts separated by dots.'; return; }
-        function b64url(s) {
-            s = s.replace(/-/g, '+').replace(/_/g, '/');
-            while (s.length % 4) s += '=';
-            return atob(s);
-        }
-        try {
-            var header  = JSON.parse(b64url(parts[0]));
-            var payload = JSON.parse(b64url(parts[1]));
-            document.getElementById('jwt-header-out').textContent  = JSON.stringify(header, null, 2);
-            document.getElementById('jwt-payload-out').textContent = JSON.stringify(payload, null, 2);
-            document.getElementById('jwt-sig-out').textContent     = parts[2];
-            var expiryEl = document.getElementById('jwt-expiry');
-            if (payload.exp) {
-                var exp = new Date(payload.exp * 1000), now = new Date();
-                if (exp < now) {
-                    expiryEl.innerHTML = '<span class="badge badge-red"><i class="fas fa-times-circle"></i> Expired</span> <span style="font-size:12px;color:var(--gray);margin-left:6px">' + exp.toUTCString() + '</span>';
-                } else {
-                    var diff = Math.round((exp - now) / 1000);
-                    var diffStr = diff > 3600 ? Math.round(diff / 3600) + 'h' : diff + 's';
-                    expiryEl.innerHTML = '<span class="badge badge-green"><i class="fas fa-check-circle"></i> Valid</span> <span style="font-size:12px;color:var(--gray);margin-left:6px">expires ' + exp.toUTCString() + ' (' + diffStr + ' remaining)</span>';
-                }
-            } else {
-                expiryEl.textContent = '';
-            }
-            result.style.display = 'block';
-        } catch(e) {
-            errEl.textContent = 'Failed to decode: ' + e.message;
-        }
-    };
-
-    // ── URL Encoder / Decoder ─────────────────────────────────
-    window.urlEncode = function() {
-        var input  = document.getElementById('urlenc-input').value;
-        var status = document.getElementById('urlenc-status');
-        try {
-            document.getElementById('urlenc-output').value = encodeURIComponent(input);
-            status.innerHTML = '<span style="color:#30d158">Encoded.</span>';
-        } catch(e) {
-            status.innerHTML = '<span style="color:#ff453a">Error: ' + e.message + '</span>';
-        }
-    };
-
-    window.urlDecode = function() {
-        var input  = document.getElementById('urlenc-input').value;
-        var status = document.getElementById('urlenc-status');
-        try {
-            document.getElementById('urlenc-output').value = decodeURIComponent(input);
-            status.innerHTML = '<span style="color:#30d158">Decoded.</span>';
-        } catch(e) {
-            status.innerHTML = '<span style="color:#ff453a">Error: ' + e.message + '</span>';
-        }
-    };
-
-    window.urlCopy = function() {
-        var val = document.getElementById('urlenc-output').value;
-        if (val) { navigator.clipboard.writeText(val); showToast('Copied!'); }
-    };
-
-    // ── UUID Generator ────────────────────────────────────────
-    window.generateUUIDs = function() {
-        var count = Math.min(50, Math.max(1, parseInt(document.getElementById('uuid-count').value) || 1));
-        var uuids = [];
-        for (var i = 0; i < count; i++) {
-            if (crypto.randomUUID) {
-                uuids.push(crypto.randomUUID());
-            } else {
-                uuids.push('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                    var r = crypto.getRandomValues(new Uint8Array(1))[0] & 15;
-                    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-                }));
-            }
-        }
-        document.getElementById('uuid-output').textContent = uuids.join('\n');
-        document.getElementById('uuid-list').style.display = 'block';
-    };
-
-    window.copyAllUUIDs = function() {
-        var val = document.getElementById('uuid-output').textContent;
-        if (val) {
-            navigator.clipboard.writeText(val);
-            showToast('Copied ' + val.split('\n').filter(Boolean).length + ' UUIDs!');
-        }
-    };
-
-    // ── cURL → Fetch Converter ────────────────────────────────
-    window.convertCurl = function() {
-        var input  = document.getElementById('curl-input').value.trim();
-        var output = document.getElementById('curl-output');
-        var errEl  = document.getElementById('curl-error');
-        errEl.textContent = '';
-        output.value = '';
-        if (!input) { errEl.textContent = 'Enter a cURL command.'; return; }
-
-        // Normalize line continuations and whitespace
-        var cmd = input.replace(/\\\n\s*/g, ' ').replace(/\s+/g, ' ').trim();
-        cmd = cmd.replace(/^curl\s+/i, '');
-
-        var url = null, method = null, headers = [], data = null, isForm = false;
-
-        // Tokenize respecting quoted strings
-        var tokens = [], re = /(-[^\s'"]+|'[^']*'|"(?:[^"\\]|\\.)*"|\S+)/g, tm;
-        while ((tm = re.exec(cmd)) !== null) tokens.push(tm[1]);
-
-        function unq(s) {
-            if ((s[0] === "'" && s[s.length-1] === "'") || (s[0] === '"' && s[s.length-1] === '"'))
-                return s.slice(1,-1).replace(/\\(.)/g, '$1');
-            return s;
-        }
-
-        for (var i = 0; i < tokens.length; i++) {
-            var t = tokens[i];
-            if (t === '-X' || t === '--request')                              { method = tokens[++i] && unq(tokens[i]); }
-            else if (t === '-H' || t === '--header')                           { var h = tokens[++i] && unq(tokens[i]); if (h) headers.push(h); }
-            else if (t === '-d' || t === '--data' || t === '--data-raw' || t === '--data-ascii') { data = tokens[++i] && unq(tokens[i]); }
-            else if (t === '-F' || t === '--form')                             { data = tokens[++i] && unq(tokens[i]); isForm = true; }
-            else if (t === '--json')                                            { data = tokens[++i] && unq(tokens[i]); headers.push('Content-Type: application/json'); headers.push('Accept: application/json'); }
-            else if (!t.startsWith('-'))                                       { url = unq(t); }
-        }
-
-        if (!url) { errEl.textContent = 'Could not find a URL in the cURL command.'; return; }
-        if (!method) method = data ? 'POST' : 'GET';
-
-        // Remove duplicate headers (--json may have added them)
-        headers = headers.filter(function(h, i, a) { return a.indexOf(h) === i; });
-
-        var lines = [];
-        var hasBody = ['POST','PUT','PATCH'].includes(method) && data;
-        lines.push("fetch('" + url + "', {");
-        lines.push("  method: '" + method + "',");
-        if (headers.length) {
-            lines.push('  headers: {');
-            headers.forEach(function(h, idx) {
-                var c = h.indexOf(':');
-                if (c > 0) {
-                    var k = h.substring(0,c).trim(), v = h.substring(c+1).trim();
-                    lines.push("    '" + k + "': '" + v.replace(/'/g,"\\'") + "'" + (idx < headers.length-1 ? ',' : ''));
-                }
-            });
-            lines.push('  }' + (hasBody ? ',' : ''));
-        }
-        if (hasBody) {
-            if (isForm) {
-                lines.push("  // FormData — convert manually if needed");
-                lines.push("  body: '" + data.replace(/\\/g,'\\\\').replace(/'/g,"\\'") + "'");
-            } else {
-                var parsed = null;
-                try { parsed = JSON.parse(data); } catch(e) {}
-                lines.push(parsed !== null
-                    ? '  body: JSON.stringify(' + JSON.stringify(parsed, null, 4).split('\n').join('\n  ') + ')'
-                    : "  body: '" + data.replace(/\\/g,'\\\\').replace(/'/g,"\\'") + "'");
-            }
-        }
-        lines.push('})');
-        lines.push('.then(res => res.json())');
-        lines.push('.then(data => console.log(data))');
-        lines.push('.catch(err => console.error(err));');
-        output.value = lines.join('\n');
-    };
-
-    window.copyCurlOutput = function() {
-        var val = document.getElementById('curl-output').value;
-        if (val) { navigator.clipboard.writeText(val); showToast('Copied!'); }
-    };
-
-    // ── Toast ─────────────────────────────────────────────────
-    var toastEl;
-    function showToast(msg) {
-        if (!toastEl) {
-            toastEl = document.createElement('div');
-            toastEl.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--white);z-index:9999;transition:opacity 0.3s;pointer-events:none;';
-            document.body.appendChild(toastEl);
-        }
-        toastEl.textContent = msg;
-        toastEl.style.opacity = '1';
-        clearTimeout(toastEl._t);
-        toastEl._t = setTimeout(function() { toastEl.style.opacity = '0'; }, 2000);
-    }
-
-    // Init
-    updateColour('#2997ff');
-
-})();
-</script>
+<!-- ─ Command Palette ──────────────────────────────────────── -->
+<div id="cmd-overlay" class="cmd-overlay hidden" role="dialog" aria-modal="true" aria-label="Command palette">
+    <div class="cmd-box">
+        <div class="cmd-search-row">
+            <i class="fas fa-search cmd-icon"></i>
+            <input id="cmd-input" class="cmd-input" placeholder="Search tools…" autocomplete="off" spellcheck="false">
+            <kbd class="cmd-esc-hint">ESC</kbd>
+        </div>
+        <div class="cmd-results" id="cmd-results"></div>
+    </div>
+</div>
+
+<script type="module" src="/js/dashboard.js"></script>
 </body>
 </html>
