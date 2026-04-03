@@ -849,6 +849,9 @@ footer {
     margin-bottom: 24px;
 }
 
+.post-body ul { list-style: disc; }
+.post-body ol { list-style: decimal; }
+
 .post-body li { margin-bottom: 8px; }
 
 .post-body blockquote {
